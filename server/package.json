@@ -1,0 +1,16 @@
+{
+  "name": "huaxingyuan-attendance-server",
+  "version": "1.0.0",
+  "description": "华星园社区考勤系统后端云服务与数据持久化 API",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.19.2",
+    "multer": "^1.4.5-lts.1",
+    "sqlite3": "^5.1.7"
+  }
+}
