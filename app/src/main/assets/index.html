@@ -1,0 +1,1294 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#0B0F1C">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="manifest" href="manifest.json">
+  <title>华星园社区 - 智能考勤</title>
+  <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+  <style>
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+    .glass-card {
+      background: rgba(15, 23, 42, 0.75);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    
+    .ai-aurora-glow {
+      background: radial-gradient(circle at 50% 0%, rgba(99, 102, 241, 0.25) 0%, rgba(168, 85, 247, 0.12) 40%, transparent 75%);
+    }
+
+    .neon-pill-cyan {
+      box-shadow: 0 0 12px rgba(6, 182, 212, 0.25);
+    }
+  </style>
+</head>
+<body class="bg-[#090D18] text-slate-100 antialiased min-h-screen flex flex-col relative selection:bg-indigo-500 selection:text-white pb-20">
+
+  <!-- 顶部状态与安全区 -->
+  <header class="relative px-4 py-3.5 select-none z-20 border-b border-white/[0.08] bg-[#0E1526]/90 backdrop-blur-xl sticky top-0">
+    <div class="absolute inset-0 bg-gradient-to-r from-indigo-500/10 via-purple-500/10 to-cyan-500/10 pointer-events-none"></div>
+    <div class="relative flex items-center justify-between">
+      <div>
+        <div class="flex items-center gap-1.5">
+          <svg class="w-4 h-4 text-cyan-400 shrink-0" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L14.4 7.6L20 10L14.4 12.4L12 18L9.6 12.4L4 10L9.6 7.6L12 2Z"/></svg>
+          <span id="header-title" class="bg-gradient-to-r from-white via-slate-100 to-indigo-200 bg-clip-text text-transparent font-black tracking-tight text-base">华星园社区</span>
+        </div>
+        <p class="text-[11px] text-slate-400 mt-0.5" id="header-subtitle">AI 智能考勤 · 假勤多维感知 (共4人)</p>
+      </div>
+      <div class="flex items-center gap-1.5">
+        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-indigo-500/15 border border-indigo-400/30 text-indigo-300 text-[10px] font-medium backdrop-blur-md neon-pill-cyan">
+          <span class="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse"></span>
+          默认全勤
+        </span>
+      </div>
+    </div>
+  </header>
+
+  <!-- 主视口区域 -->
+  <main class="flex-1 overflow-y-auto no-scrollbar relative p-3.5 space-y-3">
+    
+    <!-- 顶部环境光晕层 -->
+    <div class="absolute top-0 left-0 right-0 h-48 ai-aurora-glow pointer-events-none z-0"></div>
+
+    <!-- ================= 页面 1: 每日记考勤 ================= -->
+    <section id="tab-daily" class="space-y-3 relative z-10">
+      
+      <!-- 日期胶囊卡片 -->
+      <div class="glass-card rounded-2xl p-2.5 flex items-center justify-between text-xs shadow-lg">
+        <button onclick="switchDate(-1)" class="p-1 hover:bg-white/[0.06] rounded-xl text-slate-400 hover:text-slate-200 active:scale-90 transition">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+        </button>
+        <div class="text-center">
+          <span class="font-bold text-white text-sm tracking-wide" id="cur-date-display">2026年11月07日</span>
+          <span class="ml-1.5 text-[10px] bg-gradient-to-r from-cyan-500/20 to-blue-500/20 border border-cyan-500/30 text-cyan-300 px-2 py-0.5 rounded-full font-semibold shadow-xs" id="today-badge">今天</span>
+        </div>
+        <button onclick="switchDate(1)" class="p-1 hover:bg-white/[0.06] rounded-xl text-slate-400 hover:text-slate-200 active:scale-90 transition">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+        </button>
+      </div>
+
+      <!-- AI 考勤规则提示条 -->
+      <div class="rounded-xl px-3 py-2 flex items-center justify-between text-[11px] bg-indigo-950/40 border border-indigo-500/20 text-indigo-200 backdrop-blur-md">
+        <span class="flex items-center gap-1.5 font-medium">
+          <svg class="w-3.5 h-3.5 text-cyan-400 shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clip-rule="evenodd"/></svg>
+          未登记请假/加班即为默认全勤 (8h)
+        </span>
+        <span class="text-cyan-300 font-semibold text-[10px]">4h半天 / 8h全天</span>
+      </div>
+
+      <!-- 员工考勤记录卡片列表 -->
+      <div class="space-y-3" id="daily-attendance-list"></div>
+
+      <!-- 底部自动保存与次日0点自动汇总状态提示 -->
+      <div class="pt-2 pb-1 text-center select-none">
+        <div class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white/[0.04] border border-white/[0.08] shadow-sm text-slate-400 rounded-full text-[10px]">
+          <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span>修改即时自动保存 · 每日 00:00 自动归档汇总</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= 页面 2: 假期额度与月度汇总 ================= -->
+    <section id="tab-summary" class="space-y-3 relative z-10 hidden">
+      <div class="glass-card rounded-2xl p-2.5 flex items-center justify-between text-xs">
+        <span class="font-bold text-white text-sm">2026年11月 假期与工时总览</span>
+        <button onclick="exportExcelReport()" class="px-2.5 py-1 bg-gradient-to-r from-emerald-600 to-teal-600 text-white rounded-xl text-xs font-medium hover:opacity-90 active:scale-95 transition flex items-center gap-1 shadow-md shadow-emerald-500/20">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+          导出对账表
+        </button>
+      </div>
+
+      <div class="bg-indigo-950/40 border border-indigo-500/25 rounded-xl px-3 py-2 flex items-center justify-between text-[11px] text-indigo-200">
+        <span class="flex items-center gap-1.5 font-medium">
+          <svg class="w-3.5 h-3.5 text-cyan-400" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/></svg>
+          每日次日 00:00 系统自动汇总归档前一日考勤
+        </span>
+        <span class="text-[10px] text-indigo-400">自动入库</span>
+      </div>
+
+      <div class="relative overflow-hidden rounded-2xl p-4 border border-white/[0.12] bg-gradient-to-br from-[#1E1B4B]/90 via-[#0F172A]/90 to-[#0B0F1C]/90 shadow-2xl space-y-3">
+        <div class="flex justify-between items-center text-xs">
+          <span class="text-indigo-200 font-medium">全组累计额度池</span>
+          <span class="bg-white/10 text-slate-300 text-[10px] px-2 py-0.5 rounded-full border border-white/10" id="sum-emp-count-badge">共 4 人</span>
+        </div>
+        <div class="grid grid-cols-3 gap-2 pt-1 text-center">
+          <div class="bg-white/[0.04] backdrop-blur-md rounded-xl p-2 border border-white/[0.08]">
+            <div class="text-[10px] text-emerald-400 font-medium">年假剩余</div>
+            <div class="text-base font-bold text-white mt-0.5" id="sum-annual-remain">112h</div>
+          </div>
+          <div class="bg-white/[0.04] backdrop-blur-md rounded-xl p-2 border border-white/[0.08]">
+            <div class="text-[10px] text-rose-400 font-medium">病假剩余</div>
+            <div class="text-base font-bold text-white mt-0.5" id="sum-sick-remain">224h</div>
+          </div>
+          <div class="bg-white/[0.04] backdrop-blur-md rounded-xl p-2 border border-white/[0.08]">
+            <div class="text-[10px] text-purple-400 font-medium">调休结存</div>
+            <div class="text-base font-bold text-white mt-0.5" id="sum-comp-remain">28h</div>
+          </div>
+        </div>
+        <div class="border-t border-white/[0.08] pt-2 flex justify-between text-xs text-slate-300">
+          <span>值班: <strong class="text-white" id="sum-duty-hours">16h</strong></span>
+          <span>加班: <strong class="text-white" id="sum-ot-hours">18h</strong></span>
+          <span>已休假: <strong class="text-white" id="sum-leave-hours">24h</strong></span>
+        </div>
+      </div>
+
+      <div class="glass-card rounded-2xl shadow-xl overflow-hidden">
+        <div class="p-3 border-b border-white/[0.06] flex items-center justify-between">
+          <h3 class="text-xs font-bold text-slate-200">各员工剩余额度明细</h3>
+          <span class="text-[11px] text-indigo-400">点击查看逐日流水</span>
+        </div>
+        <div class="divide-y divide-white/[0.06]" id="summary-member-table"></div>
+      </div>
+    </section>
+
+    <!-- ================= 页面 3: 员工档案与设置 ================= -->
+    <section id="tab-members" class="space-y-3 relative z-10 hidden">
+      <div class="flex items-center justify-between">
+        <div>
+          <span class="text-xs font-bold text-white">员工花名册 (<span id="roster-count">4</span>人)</span>
+          <p class="text-[10px] text-slate-400">支持单独编辑及批量设假</p>
+        </div>
+        <div class="flex items-center gap-2">
+          <button onclick="openBatchSettingModal()" class="px-2.5 py-1.5 bg-indigo-500/15 border border-indigo-500/30 text-indigo-300 rounded-xl text-xs font-semibold hover:bg-indigo-500/25 active:scale-95 transition flex items-center gap-1 shadow-sm">
+            <svg class="w-3.5 h-3.5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/></svg>
+            批量设假
+          </button>
+          <button onclick="openAddEmployeeModal()" class="px-2.5 py-1.5 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white rounded-xl text-xs font-semibold hover:opacity-90 active:scale-95 transition flex items-center gap-1 shadow-lg shadow-indigo-500/25">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+            录入员工
+          </button>
+        </div>
+      </div>
+
+      <div class="glass-card rounded-2xl p-2.5 flex items-center justify-between text-xs">
+        <div class="flex items-center gap-2 text-slate-300">
+          <span class="w-2 h-2 rounded-full bg-purple-400 shadow-[0_0_8px_rgba(168,85,247,0.5)]"></span>
+          <span>加班类型: <strong class="text-white">值班、加班</strong></span>
+        </div>
+        <button onclick="openOtTypeModal()" class="text-indigo-400 font-medium hover:underline text-xs">
+          管理类型 &gt;
+        </button>
+      </div>
+
+      <div class="space-y-2.5" id="roster-list-container"></div>
+    </section>
+
+  </main>
+
+  <!-- 底部固定 Tab 导航 Dock -->
+  <nav class="fixed bottom-0 left-0 right-0 h-16 bg-[#0B0F1C]/90 backdrop-blur-2xl border-t border-white/[0.08] px-6 flex justify-around items-center z-30 select-none">
+    <button onclick="navigateTo('daily')" id="btn-nav-daily" class="flex flex-col items-center gap-0.5 text-cyan-400 transition">
+      <svg class="w-5 h-5 drop-shadow-[0_0_8px_rgba(6,182,212,0.4)]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
+      <span class="text-[10px] font-semibold">记考勤</span>
+    </button>
+
+    <button onclick="navigateTo('summary')" id="btn-nav-summary" class="flex flex-col items-center gap-0.5 text-slate-400 hover:text-slate-200 transition">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+      <span class="text-[10px] font-semibold">汇总&额度</span>
+    </button>
+
+    <button onclick="navigateTo('members')" id="btn-nav-members" class="flex flex-col items-center gap-0.5 text-slate-400 hover:text-slate-200 transition">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+      <span class="text-[10px] font-semibold">员工档案</span>
+    </button>
+  </nav>
+
+  <!-- 弹窗 1: 单独编辑 / 录入员工档案 -->
+  <div id="modal-employee" class="fixed inset-0 bg-black/60 backdrop-blur-md z-40 flex flex-col justify-end transition-opacity duration-200 hidden">
+    <div class="bg-[#0F172A]/95 border-t border-white/[0.12] rounded-t-3xl p-4 space-y-3.5 max-h-[92%] overflow-y-auto shadow-2xl text-white">
+      <div class="flex items-center justify-between border-b border-white/[0.08] pb-2">
+        <div>
+          <h3 class="font-bold text-sm text-white" id="emp-modal-title">编辑员工档案</h3>
+          <p class="text-[10px] text-slate-400">设置个人信息与独立年假、病假初始及剩余额度</p>
+        </div>
+        <button onclick="closeEmployeeModal()" class="w-7 h-7 bg-white/[0.08] hover:bg-white/[0.15] rounded-full flex items-center justify-center text-slate-300 font-bold">×</button>
+      </div>
+
+      <div class="flex items-center gap-3 bg-white/[0.03] p-2.5 rounded-2xl border border-white/[0.08]">
+        <div class="w-14 h-14 rounded-full bg-slate-800 border-2 border-indigo-500/40 shadow-sm flex items-center justify-center text-slate-400 overflow-hidden relative shrink-0">
+          <img id="emp-avatar-preview" class="w-full h-full object-cover" src="" alt="照片">
+        </div>
+        <div class="space-y-1">
+          <div class="text-xs font-semibold text-white">员工照片 (支持更换)</div>
+          <div class="flex items-center gap-2">
+            <button onclick="triggerPhoto('camera')" class="px-2 py-1 bg-white/[0.06] border border-white/[0.12] hover:bg-white/[0.12] text-[11px] rounded-lg font-medium text-slate-200 flex items-center gap-1">
+              <svg class="w-3 h-3 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+              现场拍照
+            </button>
+            <button onclick="triggerPhoto('upload')" class="px-2 py-1 bg-white/[0.06] border border-white/[0.12] hover:bg-white/[0.12] text-[11px] rounded-lg font-medium text-slate-200 flex items-center gap-1">
+              <svg class="w-3 h-3 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+              本地相册
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-2 gap-2 text-xs">
+        <div>
+          <label class="block font-medium text-slate-300 mb-0.5">员工编号</label>
+          <input type="text" id="inp-emp-no" class="w-full bg-slate-900 border border-white/[0.12] rounded-xl px-2.5 py-1.5 text-xs text-white font-mono focus:outline-none focus:border-indigo-500">
+        </div>
+        <div>
+          <label class="block font-medium text-slate-300 mb-0.5">姓名</label>
+          <input type="text" id="inp-emp-name" class="w-full bg-slate-900 border border-white/[0.12] rounded-xl px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-indigo-500">
+        </div>
+      </div>
+      <div class="text-xs">
+        <label class="block font-medium text-slate-300 mb-0.5">手机号码</label>
+        <input type="tel" id="inp-emp-phone" class="w-full bg-slate-900 border border-white/[0.12] rounded-xl px-2.5 py-1.5 text-xs text-white font-mono focus:outline-none focus:border-indigo-500">
+      </div>
+
+      <div class="bg-emerald-950/30 border border-emerald-500/30 rounded-2xl p-2.5 space-y-1.5">
+        <div class="flex justify-between items-center text-xs">
+          <span class="font-bold text-emerald-300">年假额度单独设置</span>
+          <span class="text-[10px] text-emerald-400">8小时 = 1天</span>
+        </div>
+        <div class="grid grid-cols-2 gap-2 text-xs">
+          <div>
+            <span class="text-[11px] text-slate-400">每年初始总额:</span>
+            <div class="flex items-center gap-1 mt-0.5">
+              <input type="number" id="inp-annual-days" value="5" min="0" max="30" onchange="syncAnnualHours(this.value)" class="w-16 bg-slate-900 border border-emerald-500/40 rounded-lg px-2 py-1 text-xs text-center font-bold text-white">
+              <span class="text-xs text-slate-400">天</span>
+              <span class="text-[11px] text-emerald-400 font-bold" id="lbl-annual-hours">(40h)</span>
+            </div>
+          </div>
+          <div>
+            <span class="text-[11px] text-slate-400">当前剩余可用:</span>
+            <div class="flex items-center gap-1 mt-0.5">
+              <input type="number" id="inp-annual-remain" value="32" min="0" step="4" class="w-16 bg-slate-900 border border-emerald-500/40 rounded-lg px-2 py-1 text-xs text-center font-bold text-emerald-400">
+              <span class="text-xs text-slate-400">小时</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-rose-950/30 border border-rose-500/30 rounded-2xl p-2.5 space-y-1.5">
+        <div class="flex justify-between items-center text-xs">
+          <span class="font-bold text-rose-300">病假额度单独设置</span>
+          <span class="text-[10px] text-rose-400">8小时 = 1天</span>
+        </div>
+        <div class="grid grid-cols-2 gap-2 text-xs">
+          <div>
+            <span class="text-[11px] text-slate-400">每年病假上限:</span>
+            <div class="flex items-center gap-1 mt-0.5">
+              <input type="number" id="inp-sick-days" value="10" min="0" max="60" onchange="syncSickHours(this.value)" class="w-16 bg-slate-900 border border-rose-500/40 rounded-lg px-2 py-1 text-xs text-center font-bold text-white">
+              <span class="text-xs text-slate-400">天</span>
+              <span class="text-[11px] text-rose-400 font-bold" id="lbl-sick-hours">(80h)</span>
+            </div>
+          </div>
+          <div>
+            <span class="text-[11px] text-slate-400">当前剩余病假:</span>
+            <div class="flex items-center gap-1 mt-0.5">
+              <input type="number" id="inp-sick-remain" value="80" min="0" step="4" class="w-16 bg-slate-900 border border-rose-500/40 rounded-lg px-2 py-1 text-xs text-center font-bold text-rose-400">
+              <span class="text-xs text-slate-400">小时</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2 pt-1">
+        <button onclick="deleteCurrentEmployee()" id="btn-delete-emp" class="px-3 py-2.5 bg-rose-500/10 border border-rose-500/30 text-rose-300 font-medium rounded-xl text-xs hover:bg-rose-500/20 transition">
+          删除
+        </button>
+        <button onclick="saveEmployeeData()" class="flex-1 py-2.5 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 hover:opacity-90 active:scale-95 text-white font-medium rounded-xl text-xs transition shadow-lg shadow-indigo-500/30">
+          保存员工档案与额度
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 弹窗 2: 批量设置年假与病假 -->
+  <div id="modal-batch-quota" class="fixed inset-0 bg-black/60 backdrop-blur-md z-40 flex flex-col justify-end transition-opacity duration-200 hidden">
+    <div class="bg-[#0F172A]/95 border-t border-white/[0.12] rounded-t-3xl p-4 space-y-3.5 max-h-[92%] overflow-y-auto shadow-2xl text-white">
+      <div class="flex items-center justify-between border-b border-white/[0.08] pb-2">
+        <div>
+          <h3 class="font-bold text-sm text-white">批量设置假期额度</h3>
+          <p class="text-[10px] text-slate-400">一键统一年假与病假配额</p>
+        </div>
+        <button onclick="closeBatchModal()" class="w-7 h-7 bg-white/[0.08] hover:bg-white/[0.15] rounded-full flex items-center justify-center text-slate-300 font-bold">×</button>
+      </div>
+
+      <div>
+        <div class="flex justify-between items-center mb-1.5 text-xs">
+          <span class="font-bold text-slate-300">选择应用员工范围</span>
+          <div class="flex items-center gap-2">
+            <button onclick="toggleSelectAllBatch(true)" class="text-indigo-400 font-medium hover:underline text-[11px]">全选</button>
+            <span class="text-slate-600">|</span>
+            <button onclick="toggleSelectAllBatch(false)" class="text-slate-400 font-medium hover:underline text-[11px]">清空</button>
+          </div>
+        </div>
+        <div class="grid grid-cols-2 gap-1.5 max-h-32 overflow-y-auto p-1 bg-slate-900 rounded-xl border border-white/[0.08]" id="batch-emp-checkbox-list"></div>
+      </div>
+
+      <div class="bg-emerald-950/30 border border-emerald-500/30 rounded-xl p-2.5">
+        <div class="flex justify-between items-center mb-1 text-xs">
+          <span class="font-bold text-emerald-300">统一设定【年假】额度</span>
+          <span class="text-[10px] text-emerald-400">8h = 1天</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="text-xs text-slate-300">每年额度:</span>
+          <input type="number" id="batch-annual-days" value="5" min="0" max="30" class="w-16 bg-slate-900 border border-emerald-500/40 rounded-lg px-2 py-1 text-xs text-center font-bold text-white">
+          <span class="text-xs text-slate-300">天</span>
+          <span class="text-xs font-bold text-emerald-400 ml-1">(40小时)</span>
+        </div>
+      </div>
+
+      <div class="bg-rose-950/30 border border-rose-500/30 rounded-xl p-2.5">
+        <div class="flex justify-between items-center mb-1 text-xs">
+          <span class="font-bold text-rose-300">统一设定【病假】额度</span>
+          <span class="text-[10px] text-rose-400">8h = 1天</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="text-xs text-slate-300">每年上限:</span>
+          <input type="number" id="batch-sick-days" value="10" min="0" max="60" class="w-16 bg-slate-900 border border-rose-500/40 rounded-lg px-2 py-1 text-xs text-center font-bold text-white">
+          <span class="text-xs text-slate-300">天</span>
+          <span class="text-xs font-bold text-rose-400 ml-1">(80小时)</span>
+        </div>
+      </div>
+
+      <div class="bg-white/[0.03] rounded-xl p-2 border border-white/[0.08] text-xs space-y-1">
+        <label class="flex items-center gap-2 cursor-pointer">
+          <input type="radio" name="batch-mode" value="reset-all" checked class="text-indigo-600">
+          <span class="text-slate-300">重置总额并将剩余额度填满</span>
+        </label>
+        <label class="flex items-center gap-2 cursor-pointer">
+          <input type="radio" name="batch-mode" value="only-total" class="text-indigo-600">
+          <span class="text-slate-300">仅更新总配额，保留当前已扣减余额</span>
+        </label>
+      </div>
+
+      <button onclick="executeBatchQuotaUpdate()" class="w-full py-2.5 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 hover:opacity-90 active:scale-95 text-white font-medium rounded-xl text-xs transition shadow-lg shadow-indigo-500/30">
+        确认一键批量更新选中员工
+      </button>
+    </div>
+  </div>
+
+  <!-- 弹窗 3: 请假登记抽屉 -->
+  <div id="modal-leave" class="fixed inset-0 bg-black/60 backdrop-blur-md z-40 flex flex-col justify-end transition-opacity duration-200 hidden">
+    <div class="bg-[#0F172A]/95 border-t border-white/[0.12] rounded-t-3xl p-4 space-y-3.5 max-h-[88%] overflow-y-auto shadow-2xl text-white">
+      <div class="flex items-center justify-between border-b border-white/[0.08] pb-2">
+        <div>
+          <h3 class="font-bold text-sm text-white">登记请假 - <span id="leave-modal-empname">陈晓</span></h3>
+          <p class="text-[10px] text-slate-400" id="leave-modal-quota-tip">年假余: 32h | 病假余: 80h | 调休余: 4h</p>
+        </div>
+        <button onclick="closeLeaveModal()" class="w-7 h-7 bg-white/[0.08] hover:bg-white/[0.15] rounded-full flex items-center justify-center text-slate-300 font-bold">×</button>
+      </div>
+
+      <div>
+        <div class="flex justify-between items-center mb-1.5">
+          <label class="text-xs font-semibold text-slate-300">请假类型</label>
+          <span class="text-[10px] text-cyan-400 font-medium">显示当前剩余数量</span>
+        </div>
+        <div class="grid grid-cols-4 gap-1.5 text-xs">
+          <button onclick="selectLeaveType('年假')" id="lt-btn-年假" class="py-2 px-1 rounded-xl border border-white/[0.1] bg-white/[0.04] font-medium transition text-center flex flex-col items-center justify-center">
+            <span class="font-bold text-xs">年假</span>
+            <span id="lt-badge-年假" class="block text-[10px] text-emerald-400 font-bold mt-0.5">余 32h</span>
+          </button>
+          <button onclick="selectLeaveType('病假')" id="lt-btn-病假" class="py-2 px-1 rounded-xl border border-white/[0.1] bg-white/[0.04] font-medium transition text-center flex flex-col items-center justify-center">
+            <span class="font-bold text-xs">病假</span>
+            <span id="lt-badge-病假" class="block text-[10px] text-rose-400 font-bold mt-0.5">余 80h</span>
+          </button>
+          <button onclick="selectLeaveType('调休')" id="lt-btn-调休" class="py-2 px-1 rounded-xl border border-white/[0.1] bg-white/[0.04] font-medium transition text-center flex flex-col items-center justify-center">
+            <span class="font-bold text-xs">调休</span>
+            <span id="lt-badge-调休" class="block text-[10px] text-purple-400 font-bold mt-0.5">余 4h</span>
+          </button>
+          <button onclick="selectLeaveType('事假')" id="lt-btn-事假" class="py-2 px-1 rounded-xl border border-white/[0.1] bg-white/[0.04] font-medium transition text-center flex flex-col items-center justify-center">
+            <span class="font-bold text-xs">事假</span>
+            <span id="lt-badge-事假" class="block text-[10px] text-slate-400 font-medium mt-0.5">不限额</span>
+          </button>
+        </div>
+      </div>
+
+      <div>
+        <label class="block text-xs font-semibold text-slate-300 mb-1.5">请假时长 (整数小时)</label>
+        <div class="grid grid-cols-3 gap-2 text-xs mb-2">
+          <button onclick="selectLeaveHours(4)" id="lh-btn-4" class="py-2 rounded-xl border border-white/[0.1] bg-white/[0.04] font-medium transition flex flex-col items-center">
+            <span class="font-bold text-sm text-white">4 小时</span>
+            <span class="text-[10px] text-slate-400">(半天)</span>
+          </button>
+          <button onclick="selectLeaveHours(8)" id="lh-btn-8" class="py-2 rounded-xl border border-white/[0.1] bg-white/[0.04] font-medium transition flex flex-col items-center">
+            <span class="font-bold text-sm text-white">8 小时</span>
+            <span class="text-[10px] text-slate-400">(全天)</span>
+          </button>
+          <button onclick="selectLeaveHours('custom')" id="lh-btn-custom" class="py-2 rounded-xl border border-white/[0.1] bg-white/[0.04] font-medium transition flex flex-col items-center justify-center">
+            <span class="font-bold text-xs text-white">其它整数</span>
+            <span class="text-[10px] text-slate-400">(按小时)</span>
+          </button>
+        </div>
+        <div id="custom-hour-box" class="hidden flex items-center gap-2 bg-slate-900 p-2 rounded-xl border border-white/[0.1]">
+          <span class="text-xs text-slate-400">输入小时:</span>
+          <input type="number" step="1" min="1" max="24" id="custom-hour-input" value="2" onchange="onCustomHourChange(this.value)" class="w-16 bg-slate-800 border border-white/[0.12] rounded px-2 py-1 text-xs text-center font-bold text-white">
+          <span class="text-xs text-slate-400">小时 (整数)</span>
+        </div>
+      </div>
+
+      <div id="leave-calc-preview" class="bg-amber-950/30 border border-amber-500/30 text-amber-200 rounded-xl p-2.5 text-xs flex items-start gap-2">
+        <svg class="w-4 h-4 text-amber-400 shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
+        <div>
+          <div class="font-bold" id="preview-leave-title">额度变动试算</div>
+          <div class="text-[11px] text-amber-300/80" id="preview-leave-desc">本次将扣减年假 8 小时。</div>
+        </div>
+      </div>
+
+      <button onclick="confirmSubmitLeave()" class="w-full py-2.5 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 hover:opacity-90 active:scale-95 text-white font-medium rounded-xl text-xs transition shadow-lg shadow-indigo-500/30">
+        确定登记请假 (实时保存)
+      </button>
+    </div>
+  </div>
+
+  <!-- 弹窗 4: 加班/值班抽屉 -->
+  <div id="modal-ot" class="fixed inset-0 bg-black/60 backdrop-blur-md z-40 flex flex-col justify-end transition-opacity duration-200 hidden">
+    <div class="bg-[#0F172A]/95 border-t border-white/[0.12] rounded-t-3xl p-4 space-y-3.5 shadow-2xl text-white">
+      <div class="flex items-center justify-between border-b border-white/[0.08] pb-2">
+        <div>
+          <h3 class="font-bold text-sm text-white">登记加班/值班 - <span id="ot-modal-empname">张健</span></h3>
+          <p class="text-[10px] text-purple-400">工时 1:1 计入员工调休池</p>
+        </div>
+        <button onclick="closeOtModal()" class="w-7 h-7 bg-white/[0.08] hover:bg-white/[0.15] rounded-full flex items-center justify-center text-slate-300 font-bold">×</button>
+      </div>
+
+      <div>
+        <label class="text-xs font-semibold text-slate-300 block mb-1.5">加班类型</label>
+        <div class="grid grid-cols-2 gap-2 text-xs">
+          <button onclick="selectOtType('值班')" id="ott-btn-值班" class="py-2.5 rounded-xl border border-white/[0.1] bg-white/[0.04] font-medium transition text-center">
+            <span class="font-bold block text-sm text-white">值班</span>
+            <span class="text-[10px] text-slate-400">周末/假期轮岗值守</span>
+          </button>
+          <button onclick="selectOtType('加班')" id="ott-btn-加班" class="py-2.5 rounded-xl border border-white/[0.1] bg-white/[0.04] font-medium transition text-center">
+            <span class="font-bold block text-sm text-white">加班</span>
+            <span class="text-[10px] text-slate-400">项目加点赶工</span>
+          </button>
+        </div>
+      </div>
+
+      <div>
+        <label class="block text-xs font-semibold text-slate-300 mb-1.5">工时选择 (整数小时)</label>
+        <div class="grid grid-cols-4 gap-1.5 text-xs">
+          <button onclick="selectOtHours(2)" id="oth-btn-2" class="py-2 rounded-xl border border-white/[0.1] bg-white/[0.04] font-medium text-white">+2h</button>
+          <button onclick="selectOtHours(4)" id="oth-btn-4" class="py-2 rounded-xl border border-white/[0.1] bg-white/[0.04] font-medium text-white">+4h (半天)</button>
+          <button onclick="selectOtHours(8)" id="oth-btn-8" class="py-2 rounded-xl border border-white/[0.1] bg-white/[0.04] font-medium text-white">+8h (全天)</button>
+          <button onclick="selectOtHours(12)" id="oth-btn-12" class="py-2 rounded-xl border border-white/[0.1] bg-white/[0.04] font-medium text-white">+12h</button>
+        </div>
+      </div>
+
+      <div class="bg-purple-950/30 border border-purple-500/30 text-purple-200 rounded-xl p-2.5 text-xs flex items-center justify-between">
+        <span>当前调休余额: <strong id="ot-modal-cur-comp" class="text-white">8h</strong></span>
+        <span class="text-purple-300 font-bold">计入后将增至: <span id="ot-modal-after-comp" class="text-purple-200">12h</span></span>
+      </div>
+
+      <button onclick="confirmSubmitOt()" class="w-full py-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:opacity-90 active:scale-95 text-white font-medium rounded-xl text-xs transition shadow-lg shadow-purple-500/30">
+        确认计入调休池 (实时保存)
+      </button>
+    </div>
+  </div>
+
+  <!-- 弹窗 5: 加班类型管理 -->
+  <div id="modal-ot-types" class="fixed inset-0 bg-black/60 backdrop-blur-md z-40 flex flex-col justify-end transition-opacity duration-200 hidden">
+    <div class="bg-[#0F172A]/95 border-t border-white/[0.12] rounded-t-3xl p-4 space-y-3.5 shadow-2xl text-white">
+      <div class="flex items-center justify-between border-b border-white/[0.08] pb-2">
+        <div>
+          <h3 class="font-bold text-sm text-white">加班类型管理</h3>
+          <p class="text-[10px] text-slate-400">已设类型打卡可选，均可转入调休池</p>
+        </div>
+        <button onclick="closeOtTypeModal()" class="w-7 h-7 bg-white/[0.08] hover:bg-white/[0.15] rounded-full flex items-center justify-center text-slate-300 font-bold">×</button>
+      </div>
+
+      <div class="space-y-2 text-xs" id="ot-types-list"></div>
+
+      <div class="flex items-center gap-2 pt-1 border-t border-white/[0.08]">
+        <input type="text" id="new-ot-type-input" placeholder="输入新类型名称 (如：展会值勤)" class="flex-1 bg-slate-900 border border-white/[0.12] rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-purple-500">
+        <button onclick="addNewOtType()" class="px-3 py-2 bg-purple-600 text-white rounded-xl text-xs font-medium hover:bg-purple-700 active:scale-95 transition">
+          添加
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 顶部消息提示 Toast -->
+  <div id="toast-bar" class="fixed top-5 left-1/2 transform -translate-x-1/2 bg-slate-900/95 border border-white/[0.15] text-white text-xs px-4 py-2 rounded-full shadow-2xl transition-all duration-300 opacity-0 pointer-events-none z-50 flex items-center gap-1.5 backdrop-blur-xl">
+    <svg class="w-3.5 h-3.5 text-cyan-400" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
+    <span id="toast-msg">已保存</span>
+  </div>
+
+  <!-- 原型核心逻辑脚本 -->
+  <script>
+    let employees = [
+      {
+        id: 101,
+        no: "EMP-001",
+        name: "陈晓",
+        phone: "13800138001",
+        avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=60",
+        annualTotalHours: 40,
+        annualRemainHours: 32,
+        sickTotalHours: 80,
+        sickRemainHours: 80,
+        compLeaveHours: 4,
+        records: [
+          { id: 1001, category: "leave", type: "调休", hours: 4 }
+        ]
+      },
+      {
+        id: 102,
+        no: "EMP-002",
+        name: "张健",
+        phone: "13912345678",
+        avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&auto=format&fit=crop&q=60",
+        annualTotalHours: 80,
+        annualRemainHours: 64,
+        sickTotalHours: 80,
+        sickRemainHours: 72,
+        compLeaveHours: 12,
+        records: []
+      },
+      {
+        id: 103,
+        no: "EMP-003",
+        name: "李慧敏",
+        phone: "13766668888",
+        avatar: "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=100&auto=format&fit=crop&q=60",
+        annualTotalHours: 40,
+        annualRemainHours: 16,
+        sickTotalHours: 80,
+        sickRemainHours: 80,
+        compLeaveHours: 4,
+        records: [
+          { id: 1002, category: "leave", type: "年假", hours: 8 }
+        ]
+      },
+      {
+        id: 104,
+        no: "EMP-004",
+        name: "王强",
+        phone: "15988889999",
+        avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&auto=format&fit=crop&q=60",
+        annualTotalHours: 56,
+        annualRemainHours: 56,
+        sickTotalHours: 80,
+        sickRemainHours: 64,
+        compLeaveHours: 8,
+        records: [
+          { id: 1003, category: "ot", type: "值班", hours: 4 }
+        ]
+      }
+    ];
+
+    let overtimeTypes = [
+      { id: "ot_duty", name: "值班", desc: "周末/假期轮岗值守", isSystem: true },
+      { id: "ot_work", name: "加班", desc: "日常任务或紧急项目加点", isSystem: true }
+    ];
+
+    let activeEmpId = null;
+    let selectedLeaveType = "年假";
+    let selectedLeaveHours = 8;
+    let selectedOtType = "加班";
+    let selectedOtHours = 4;
+    let editingEmpId = null;
+
+    function renderDailyList() {
+      const container = document.getElementById('daily-attendance-list');
+      container.innerHTML = '';
+
+      employees.forEach(emp => {
+        const card = document.createElement('div');
+        card.className = "glass-card rounded-2xl p-3.5 transition hover:border-indigo-500/30 shadow-lg";
+
+        const recs = emp.records || [];
+        let statusBadge = '';
+
+        if (recs.length === 0) {
+          statusBadge = `<span class="bg-emerald-500/10 border border-emerald-500/25 text-emerald-400 text-[10px] px-2 py-0.5 rounded-full font-medium flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>全勤在岗 (8h)</span>`;
+        } else {
+          let totalLeaveH = 0;
+          let totalOtH = 0;
+          recs.forEach(r => {
+            if (r.category === 'leave') totalLeaveH += r.hours;
+            if (r.category === 'ot') totalOtH += r.hours;
+          });
+          let parts = [];
+          if (totalLeaveH > 0) parts.push(`休假 ${totalLeaveH}h`);
+          if (totalOtH > 0) parts.push(`加班 ${totalOtH}h`);
+          statusBadge = `<span class="bg-amber-500/10 border border-amber-500/30 text-amber-300 text-[10px] px-2 py-0.5 rounded-full font-semibold">${parts.join(' · ')} (${recs.length}条)</span>`;
+        }
+
+        const avatarBorder = recs.length === 0 ? 'border-emerald-500/50 shadow-[0_0_10px_rgba(16,185,129,0.3)]' : 'border-amber-500/60 shadow-[0_0_10px_rgba(245,158,11,0.3)]';
+
+        card.innerHTML = `
+          <div class="flex items-center justify-between mb-2.5">
+            <div class="flex items-center gap-2.5">
+              <img src="${emp.avatar}" class="w-10 h-10 rounded-full object-cover border-2 ${avatarBorder} shadow-sm">
+              <div>
+                <div class="flex items-center gap-1.5">
+                  <span class="font-bold text-white text-sm tracking-wide">${emp.name}</span>
+                  <span class="text-[10px] bg-white/[0.06] text-slate-300 px-1.5 py-0.2 rounded font-mono">${emp.no}</span>
+                </div>
+                <div class="text-[11px] text-slate-400 font-mono mt-0.5">${emp.phone}</div>
+              </div>
+            </div>
+            <div>${statusBadge}</div>
+          </div>
+
+          <div class="bg-black/25 rounded-xl px-2.5 py-1.5 mb-2.5 flex items-center justify-between text-[10px] border border-white/[0.06]">
+            <div>年假余: <strong class="text-emerald-400 font-bold">${emp.annualRemainHours}h</strong> <span class="text-slate-400">(${emp.annualRemainHours/8}d)</span></div>
+            <div class="w-px h-2.5 bg-white/[0.08]"></div>
+            <div>病假余: <strong class="text-rose-400 font-bold">${emp.sickRemainHours}h</strong> <span class="text-slate-400">(${emp.sickRemainHours/8}d)</span></div>
+            <div class="w-px h-2.5 bg-white/[0.08]"></div>
+            <div>调休余: <strong class="text-purple-400 font-bold">${emp.compLeaveHours}h</strong></div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-2 text-xs">
+            <button onclick="openLeaveModal(${emp.id})" class="py-2 rounded-xl border border-amber-500/30 bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 font-semibold transition active:scale-95 flex items-center justify-center gap-1.5 shadow-sm">
+              <svg class="w-3.5 h-3.5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+              <span>+ 登记请假</span>
+            </button>
+            <button onclick="openOtModal(${emp.id})" class="py-2 rounded-xl border border-purple-500/30 bg-purple-500/10 hover:bg-purple-500/20 text-purple-300 font-semibold transition active:scale-95 flex items-center justify-center gap-1.5 shadow-sm">
+              <svg class="w-3.5 h-3.5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>
+              <span>+ 登记加班/值班</span>
+            </button>
+          </div>
+
+          ${recs.length > 0 ? `
+            <div class="mt-2.5 pt-2 border-t border-white/[0.06] space-y-1.5">
+              ${recs.map(rec => `
+                <div class="flex items-center justify-between bg-black/30 hover:bg-black/50 transition rounded-xl px-2.5 py-1.5 text-xs border border-white/[0.06]">
+                  <div class="flex items-center gap-2">
+                    <span class="w-1.5 h-1.5 rounded-full ${rec.category === 'leave' ? 'bg-amber-400 shadow-[0_0_6px_rgba(245,158,11,0.6)]' : 'bg-purple-400 shadow-[0_0_6px_rgba(168,85,247,0.6)]'}"></span>
+                    <span class="font-medium text-slate-200">${rec.category === 'leave' ? '请假 · ' + rec.type : '加班 · ' + rec.type}</span>
+                    <span class="font-bold ${rec.category === 'leave' ? 'text-amber-400' : 'text-purple-400'}">${rec.hours}h</span>
+                    <span class="text-[10px] text-slate-400">(${rec.hours === 4 ? '半天' : rec.hours === 8 ? '全天' : rec.hours + '小时'})</span>
+                  </div>
+                  <button onclick="deleteRecord(${emp.id}, ${rec.id})" class="text-slate-400 hover:text-rose-400 p-1 hover:bg-rose-500/10 rounded-lg transition flex items-center gap-0.5 text-[11px]" title="删除该条记录">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                    <span>删除</span>
+                  </button>
+                </div>
+              `).join('')}
+            </div>
+          ` : `
+            <div class="mt-1.5 text-right">
+              <span class="text-[10px] text-slate-500">今日全勤无假勤，可直接点击上方登记</span>
+            </div>
+          `}
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    function renderRosterList() {
+      const container = document.getElementById('roster-list-container');
+      const countEl = document.getElementById('roster-count');
+      if (countEl) countEl.innerText = employees.length;
+      container.innerHTML = '';
+
+      employees.forEach(emp => {
+        const item = document.createElement('div');
+        item.className = "glass-card rounded-2xl p-3 border border-white/[0.08] flex items-center justify-between hover:border-indigo-500/40 transition cursor-pointer";
+        item.onclick = () => openEditEmployeeModal(emp.id);
+        item.innerHTML = `
+          <div class="flex items-center gap-3">
+            <img src="${emp.avatar}" class="w-11 h-11 rounded-full object-cover border-2 border-indigo-500/30 shadow-md">
+            <div>
+              <div class="font-bold text-xs text-white flex items-center gap-1.5">
+                <span>${emp.name}</span>
+                <span class="text-[10px] text-slate-400 bg-white/[0.06] px-1 py-0.2 rounded font-mono">${emp.no}</span>
+              </div>
+              <div class="text-[11px] text-slate-400 font-mono mt-0.5">${emp.phone}</div>
+              <div class="flex items-center gap-2 mt-1 text-[10px]">
+                <span class="text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-1.5 py-0.2 rounded">年假: ${emp.annualTotalHours}h (余${emp.annualRemainHours}h)</span>
+                <span class="text-rose-400 bg-rose-500/10 border border-rose-500/20 px-1.5 py-0.2 rounded">病假: ${emp.sickTotalHours}h (余${emp.sickRemainHours}h)</span>
+              </div>
+            </div>
+          </div>
+          <div class="flex items-center gap-1">
+            <button onclick="event.stopPropagation(); openEditEmployeeModal(${emp.id})" class="px-2.5 py-1 text-indigo-300 bg-indigo-500/15 hover:bg-indigo-500/25 border border-indigo-500/30 rounded-lg text-xs font-semibold flex items-center gap-1">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
+              编辑
+            </button>
+          </div>
+        `;
+        container.appendChild(item);
+      });
+    }
+
+    function openEditEmployeeModal(empId) {
+      editingEmpId = empId;
+      const emp = employees.find(e => e.id === empId);
+      if (!emp) return;
+
+      document.getElementById('emp-modal-title').innerText = `编辑员工档案 - ${emp.name}`;
+      document.getElementById('btn-delete-emp').classList.remove('hidden');
+
+      document.getElementById('inp-emp-no').value = emp.no;
+      document.getElementById('inp-emp-name').value = emp.name;
+      document.getElementById('inp-emp-phone').value = emp.phone;
+      document.getElementById('emp-avatar-preview').src = emp.avatar;
+
+      const aDays = emp.annualTotalHours / 8;
+      document.getElementById('inp-annual-days').value = aDays;
+      document.getElementById('lbl-annual-hours').innerText = `(${emp.annualTotalHours}h)`;
+      document.getElementById('inp-annual-remain').value = emp.annualRemainHours;
+
+      const sDays = emp.sickTotalHours / 8;
+      document.getElementById('inp-sick-days').value = sDays;
+      document.getElementById('lbl-sick-hours').innerText = `(${emp.sickTotalHours}h)`;
+      document.getElementById('inp-sick-remain').value = emp.sickRemainHours;
+
+      document.getElementById('modal-employee').classList.remove('hidden');
+    }
+
+    function openAddEmployeeModal() {
+      editingEmpId = null;
+      document.getElementById('emp-modal-title').innerText = "录入新员工档案";
+      document.getElementById('btn-delete-emp').classList.add('hidden');
+
+      document.getElementById('inp-emp-no').value = `EMP-00${employees.length + 1}`;
+      document.getElementById('inp-emp-name').value = "";
+      document.getElementById('inp-emp-phone').value = "";
+      document.getElementById('emp-avatar-preview').src = "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&auto=format&fit=crop&q=60";
+
+      document.getElementById('inp-annual-days').value = 5;
+      document.getElementById('lbl-annual-hours').innerText = "(40h)";
+      document.getElementById('inp-annual-remain').value = 40;
+
+      document.getElementById('inp-sick-days').value = 10;
+      document.getElementById('lbl-sick-hours').innerText = "(80h)";
+      document.getElementById('inp-sick-remain').value = 80;
+
+      document.getElementById('modal-employee').classList.remove('hidden');
+    }
+
+    function closeEmployeeModal() {
+      document.getElementById('modal-employee').classList.add('hidden');
+    }
+
+    function syncAnnualHours(days) {
+      const d = parseInt(days) || 0;
+      document.getElementById('lbl-annual-hours').innerText = `(${d * 8}h)`;
+    }
+
+    function syncSickHours(days) {
+      const d = parseInt(days) || 0;
+      document.getElementById('lbl-sick-hours').innerText = `(${d * 8}h)`;
+    }
+
+    function saveEmployeeData() {
+      const name = document.getElementById('inp-emp-name').value.trim();
+      const no = document.getElementById('inp-emp-no').value.trim();
+      const phone = document.getElementById('inp-emp-phone').value.trim();
+      const aDays = parseInt(document.getElementById('inp-annual-days').value) || 0;
+      const aRemain = parseInt(document.getElementById('inp-annual-remain').value) || 0;
+      const sDays = parseInt(document.getElementById('inp-sick-days').value) || 0;
+      const sRemain = parseInt(document.getElementById('inp-sick-remain').value) || 0;
+      const avatar = document.getElementById('emp-avatar-preview').src;
+
+      if (!name) {
+        showToast("请输入员工姓名");
+        return;
+      }
+
+      if (editingEmpId) {
+        const emp = employees.find(e => e.id === editingEmpId);
+        if (emp) {
+          emp.name = name;
+          emp.no = no;
+          emp.phone = phone;
+          emp.avatar = avatar;
+          emp.annualTotalHours = aDays * 8;
+          emp.annualRemainHours = aRemain;
+          emp.sickTotalHours = sDays * 8;
+          emp.sickRemainHours = sRemain;
+          showToast(`已保存员工【${name}】的档案与配额！`);
+        }
+      } else {
+        const newEmp = {
+          id: Date.now(),
+          no: no || `EMP-${Date.now().toString().slice(-3)}`,
+          name: name,
+          phone: phone || "13800000000",
+          avatar: avatar,
+          annualTotalHours: aDays * 8,
+          annualRemainHours: aRemain,
+          sickTotalHours: sDays * 8,
+          sickRemainHours: sRemain,
+          compLeaveHours: 0,
+          records: []
+        };
+        employees.push(newEmp);
+        showToast(`新员工【${name}】已成功录入！`);
+      }
+
+      closeEmployeeModal();
+      renderRosterList();
+      renderDailyList();
+      renderSummary();
+    }
+
+    function deleteCurrentEmployee() {
+      if (!editingEmpId) return;
+      const emp = employees.find(e => e.id === editingEmpId);
+      if (confirm(`确认要删除员工【${emp.name}】吗？`)) {
+        employees = employees.filter(e => e.id !== editingEmpId);
+        closeEmployeeModal();
+        renderRosterList();
+        renderDailyList();
+        renderSummary();
+        showToast(`已删除员工【${emp.name}】`);
+      }
+    }
+
+    function openBatchSettingModal() {
+      const container = document.getElementById('batch-emp-checkbox-list');
+      container.innerHTML = '';
+
+      employees.forEach(emp => {
+        const item = document.createElement('label');
+        item.className = "flex items-center gap-1.5 bg-white/[0.04] p-1.5 rounded-lg border border-white/[0.08] text-xs cursor-pointer";
+        item.innerHTML = `
+          <input type="checkbox" name="batch-emp" value="${emp.id}" checked class="rounded text-indigo-600 focus:ring-0">
+          <span class="font-medium text-slate-300 truncate">${emp.name}</span>
+        `;
+        container.appendChild(item);
+      });
+
+      document.getElementById('modal-batch-quota').classList.remove('hidden');
+    }
+
+    function closeBatchModal() {
+      document.getElementById('modal-batch-quota').classList.add('hidden');
+    }
+
+    function toggleSelectAllBatch(flag) {
+      const checkboxes = document.querySelectorAll('input[name="batch-emp"]');
+      checkboxes.forEach(cb => cb.checked = flag);
+    }
+
+    function executeBatchQuotaUpdate() {
+      const checkboxes = document.querySelectorAll('input[name="batch-emp"]:checked');
+      const selectedIds = Array.from(checkboxes).map(cb => parseInt(cb.value));
+
+      if (selectedIds.length === 0) {
+        showToast("请至少勾选一名员工！");
+        return;
+      }
+
+      const aDays = parseInt(document.getElementById('batch-annual-days').value) || 0;
+      const sDays = parseInt(document.getElementById('batch-sick-days').value) || 0;
+      const mode = document.querySelector('input[name="batch-mode"]:checked').value;
+
+      employees.forEach(emp => {
+        if (selectedIds.includes(emp.id)) {
+          emp.annualTotalHours = aDays * 8;
+          emp.sickTotalHours = sDays * 8;
+          if (mode === 'reset-all') {
+            emp.annualRemainHours = aDays * 8;
+            emp.sickRemainHours = sDays * 8;
+          }
+        }
+      });
+
+      closeBatchModal();
+      renderRosterList();
+      renderDailyList();
+      renderSummary();
+      showToast(`已批量更新 ${selectedIds.length} 位员工的年假与病假额度！`);
+    }
+
+    function triggerPhoto(type) {
+      showToast(type === 'camera' ? "已调起系统相机进行免冠拍照" : "已打开手机系统相册选择照片");
+      document.getElementById('emp-avatar-preview').src = "https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=100&auto=format&fit=crop&q=60";
+    }
+
+    function openLeaveModal(empId) {
+      activeEmpId = empId;
+      const emp = employees.find(e => e.id === empId);
+      document.getElementById('leave-modal-empname').innerText = emp.name;
+      document.getElementById('leave-modal-quota-tip').innerText = `年假余: ${emp.annualRemainHours}h | 病假余: ${emp.sickRemainHours}h | 调休余: ${emp.compLeaveHours}h`;
+      
+      const badgeAnnual = document.getElementById('lt-badge-年假');
+      const badgeSick = document.getElementById('lt-badge-病假');
+      const badgeComp = document.getElementById('lt-badge-调休');
+      const badgePersonal = document.getElementById('lt-badge-事假');
+
+      if (badgeAnnual) {
+        badgeAnnual.innerText = `余 ${emp.annualRemainHours}h`;
+        badgeAnnual.className = `block text-[10px] font-bold mt-0.5 ${emp.annualRemainHours > 0 ? 'text-emerald-400' : 'text-slate-500'}`;
+      }
+      if (badgeSick) {
+        badgeSick.innerText = `余 ${emp.sickRemainHours}h`;
+        badgeSick.className = `block text-[10px] font-bold mt-0.5 ${emp.sickRemainHours > 0 ? 'text-rose-400' : 'text-slate-500'}`;
+      }
+      if (badgeComp) {
+        badgeComp.innerText = `余 ${emp.compLeaveHours}h`;
+        badgeComp.className = `block text-[10px] font-bold mt-0.5 ${emp.compLeaveHours > 0 ? 'text-purple-400' : 'text-slate-500'}`;
+      }
+      if (badgePersonal) {
+        badgePersonal.innerText = `不限额`;
+      }
+
+      selectLeaveType('年假');
+      selectLeaveHours(8);
+      document.getElementById('modal-leave').classList.remove('hidden');
+    }
+
+    function closeLeaveModal() {
+      document.getElementById('modal-leave').classList.add('hidden');
+    }
+
+    function selectLeaveType(type) {
+      selectedLeaveType = type;
+      ['年假', '病假', '调休', '事假'].forEach(t => {
+        const btn = document.getElementById(`lt-btn-${t}`);
+        if (t === type) {
+          btn.className = "py-2 px-1 rounded-xl border-2 border-indigo-400 bg-indigo-500/20 text-white font-bold text-xs transition text-center flex flex-col items-center justify-center shadow-[0_0_15px_rgba(99,102,241,0.3)]";
+        } else {
+          btn.className = "py-2 px-1 rounded-xl border border-white/[0.08] bg-white/[0.04] font-medium text-xs text-slate-300 hover:border-white/[0.2] transition text-center flex flex-col items-center justify-center";
+        }
+      });
+      updateLeavePreview();
+    }
+
+    function selectLeaveHours(hours) {
+      selectedLeaveHours = hours;
+      const btn4 = document.getElementById('lh-btn-4');
+      const btn8 = document.getElementById('lh-btn-8');
+      const btnC = document.getElementById('lh-btn-custom');
+      const customBox = document.getElementById('custom-hour-box');
+
+      btn4.className = "py-2 rounded-xl border border-white/[0.1] bg-white/[0.04] font-medium transition flex flex-col items-center text-xs";
+      btn8.className = "py-2 rounded-xl border border-white/[0.1] bg-white/[0.04] font-medium transition flex flex-col items-center text-xs";
+      btnC.className = "py-2 rounded-xl border border-white/[0.1] bg-white/[0.04] font-medium transition flex flex-col items-center justify-center text-xs";
+
+      if (hours === 4) {
+        btn4.className = "py-2 rounded-xl border-2 border-indigo-400 bg-indigo-500/20 text-white font-bold transition flex flex-col items-center text-xs shadow-sm";
+        customBox.classList.add('hidden');
+      } else if (hours === 8) {
+        btn8.className = "py-2 rounded-xl border-2 border-indigo-400 bg-indigo-500/20 text-white font-bold transition flex flex-col items-center text-xs shadow-sm";
+        customBox.classList.add('hidden');
+      } else {
+        btnC.className = "py-2 rounded-xl border-2 border-indigo-400 bg-indigo-500/20 text-white font-bold transition flex flex-col items-center justify-center text-xs shadow-sm";
+        customBox.classList.remove('hidden');
+        selectedLeaveHours = parseInt(document.getElementById('custom-hour-input').value) || 2;
+      }
+      updateLeavePreview();
+    }
+
+    function onCustomHourChange(val) {
+      selectedLeaveHours = Math.max(1, parseInt(val) || 1);
+      updateLeavePreview();
+    }
+
+    function updateLeavePreview() {
+      const emp = employees.find(e => e.id === activeEmpId);
+      if (!emp) return;
+
+      const titleEl = document.getElementById('preview-leave-title');
+      const descEl = document.getElementById('preview-leave-desc');
+
+      if (selectedLeaveType === '年假') {
+        const after = emp.annualRemainHours - selectedLeaveHours;
+        titleEl.innerText = "年假额度扣减试算";
+        if (after < 0) {
+          descEl.innerHTML = `<span class="text-rose-400 font-bold">警告：年假不足！</span>当前剩余 ${emp.annualRemainHours}h，无法扣减 ${selectedLeaveHours}h。`;
+        } else {
+          descEl.innerHTML = `本次休年假 <strong>${selectedLeaveHours}h</strong> (${selectedLeaveHours/8}天)，扣减后年假剩余 <strong>${after}h</strong> (${after/8}天)。`;
+        }
+      } else if (selectedLeaveType === '病假') {
+        const after = emp.sickRemainHours - selectedLeaveHours;
+        titleEl.innerText = "病假额度扣减试算";
+        if (after < 0) {
+          descEl.innerHTML = `<span class="text-rose-400 font-bold">警告：病假配额不足！</span>当前年度病假剩余 ${emp.sickRemainHours}h，无法扣减 ${selectedLeaveHours}h。`;
+        } else {
+          descEl.innerHTML = `本次请病假 <strong>${selectedLeaveHours}h</strong> (${selectedLeaveHours/8}天)，扣减后病假剩余 <strong>${after}h</strong> (${after/8}天)。`;
+        }
+      } else if (selectedLeaveType === '调休') {
+        const after = emp.compLeaveHours - selectedLeaveHours;
+        titleEl.innerText = "调休额度扣减试算";
+        if (after < 0) {
+          descEl.innerHTML = `<span class="text-rose-400 font-bold">警告：调休额度不足！</span>当前结余 ${emp.compLeaveHours}h，无法扣减 ${selectedLeaveHours}h。`;
+        } else {
+          descEl.innerHTML = `本次调休 <strong>${selectedLeaveHours}h</strong>，扣减后剩余 <strong>${after}h</strong>。`;
+        }
+      } else {
+        titleEl.innerText = "常规事假登记";
+        descEl.innerText = `本次请事假 ${selectedLeaveHours}h (${selectedLeaveHours/8}天)，不扣减年假/病假额度。`;
+      }
+    }
+
+    function confirmSubmitLeave() {
+      const emp = employees.find(e => e.id === activeEmpId);
+      if (!emp) return;
+
+      if (selectedLeaveType === '年假' && emp.annualRemainHours < selectedLeaveHours) {
+        showToast("年假额度不足！");
+        return;
+      }
+      if (selectedLeaveType === '病假' && emp.sickRemainHours < selectedLeaveHours) {
+        showToast("病假额度不足！");
+        return;
+      }
+      if (selectedLeaveType === '调休' && emp.compLeaveHours < selectedLeaveHours) {
+        showToast("调休额度不足！");
+        return;
+      }
+
+      if (selectedLeaveType === '年假') emp.annualRemainHours -= selectedLeaveHours;
+      if (selectedLeaveType === '病假') emp.sickRemainHours -= selectedLeaveHours;
+      if (selectedLeaveType === '调休') emp.compLeaveHours -= selectedLeaveHours;
+
+      if (!emp.records) emp.records = [];
+      emp.records.push({
+        id: Date.now(),
+        category: 'leave',
+        type: selectedLeaveType,
+        hours: selectedLeaveHours
+      });
+
+      closeLeaveModal();
+      renderDailyList();
+      renderSummary();
+      showToast(`已为【${emp.name}】新增一条请假记录 (${selectedLeaveType} ${selectedLeaveHours}h)`);
+    }
+
+    function deleteRecord(empId, recId) {
+      const emp = employees.find(e => e.id === empId);
+      if (!emp || !emp.records) return;
+
+      const rec = emp.records.find(r => r.id === recId);
+      if (!rec) return;
+
+      if (rec.category === 'leave') {
+        if (rec.type === '年假') emp.annualRemainHours += rec.hours;
+        if (rec.type === '病假') emp.sickRemainHours += rec.hours;
+        if (rec.type === '调休') emp.compLeaveHours += rec.hours;
+      } else if (rec.category === 'ot') {
+        emp.compLeaveHours = Math.max(0, emp.compLeaveHours - rec.hours);
+      }
+
+      emp.records = emp.records.filter(r => r.id !== recId);
+
+      renderDailyList();
+      renderSummary();
+      showToast(`已删除【${emp.name}】的 ${rec.type} ${rec.hours}h 记录，额度已回滚！`);
+    }
+
+    function openOtModal(empId) {
+      activeEmpId = empId;
+      const emp = employees.find(e => e.id === empId);
+      document.getElementById('ot-modal-empname').innerText = emp.name;
+      document.getElementById('ot-modal-cur-comp').innerText = `${emp.compLeaveHours}h`;
+      selectOtType(overtimeTypes[0].name);
+      selectOtHours(4);
+      document.getElementById('modal-ot').classList.remove('hidden');
+    }
+
+    function closeOtModal() {
+      document.getElementById('modal-ot').classList.add('hidden');
+    }
+
+    function selectOtType(type) {
+      selectedOtType = type;
+      overtimeTypes.forEach(t => {
+        const btn = document.getElementById(`ott-btn-${t.name}`);
+        if (btn) {
+          if (t.name === type) {
+            btn.className = "py-2.5 rounded-xl border-2 border-purple-400 bg-purple-500/20 text-white font-bold text-xs transition text-center shadow-[0_0_15px_rgba(168,85,247,0.3)]";
+          } else {
+            btn.className = "py-2.5 rounded-xl border border-white/[0.08] bg-white/[0.04] font-medium text-xs text-slate-300 hover:border-white/[0.2] transition text-center";
+          }
+        }
+      });
+      updateOtPreview();
+    }
+
+    function selectOtHours(h) {
+      selectedOtHours = h;
+      [2, 4, 8, 12].forEach(val => {
+        const btn = document.getElementById(`oth-btn-${val}`);
+        if (val === h) {
+          btn.className = "py-2 rounded-xl border-2 border-purple-400 bg-purple-500/20 text-white font-bold text-xs transition shadow-sm";
+        } else {
+          btn.className = "py-2 rounded-xl border border-white/[0.08] bg-white/[0.04] font-medium text-xs text-slate-300 hover:border-white/[0.2] transition";
+        }
+      });
+      updateOtPreview();
+    }
+
+    function updateOtPreview() {
+      const emp = employees.find(e => e.id === activeEmpId);
+      if (!emp) return;
+      document.getElementById('ot-modal-cur-comp').innerText = `${emp.compLeaveHours}h`;
+      document.getElementById('ot-modal-after-comp').innerText = `${emp.compLeaveHours + selectedOtHours}h (+${selectedOtHours}h)`;
+    }
+
+    function confirmSubmitOt() {
+      const emp = employees.find(e => e.id === activeEmpId);
+      if (!emp) return;
+
+      emp.compLeaveHours += selectedOtHours;
+
+      if (!emp.records) emp.records = [];
+      emp.records.push({
+        id: Date.now(),
+        category: 'ot',
+        type: selectedOtType,
+        hours: selectedOtHours
+      });
+
+      closeOtModal();
+      renderDailyList();
+      renderSummary();
+      showToast(`已为【${emp.name}】新增一条记录 (${selectedOtType} +${selectedOtHours}h 调休)`);
+    }
+
+    function openOtTypeModal() {
+      renderOtTypesList();
+      document.getElementById('modal-ot-types').classList.remove('hidden');
+    }
+
+    function closeOtTypeModal() {
+      document.getElementById('modal-ot-types').classList.add('hidden');
+    }
+
+    function renderOtTypesList() {
+      const container = document.getElementById('ot-types-list');
+      container.innerHTML = '';
+      overtimeTypes.forEach(t => {
+        const item = document.createElement('div');
+        item.className = "bg-white/[0.04] p-2.5 rounded-xl border border-white/[0.08] flex items-center justify-between";
+        item.innerHTML = `
+          <div>
+            <div class="font-bold text-white text-xs">${t.name} ${t.isSystem ? '<span class="text-[10px] text-purple-300 bg-purple-500/20 px-1.5 py-0.2 rounded font-normal border border-purple-500/30">默认</span>' : ''}</div>
+            <div class="text-[11px] text-slate-400 mt-0.5">${t.desc}</div>
+          </div>
+          ${t.isSystem ? '' : `<button onclick="deleteOtType('${t.id}')" class="text-rose-400 hover:text-rose-300 text-xs">删除</button>`}
+        `;
+        container.appendChild(item);
+      });
+    }
+
+    function addNewOtType() {
+      const val = document.getElementById('new-ot-type-input').value.trim();
+      if (!val) return;
+      overtimeTypes.push({
+        id: `ot_custom_${Date.now()}`,
+        name: val,
+        desc: "自定义加班项目，自动计入调休池",
+        isSystem: false
+      });
+      document.getElementById('new-ot-type-input').value = '';
+      renderOtTypesList();
+      showToast(`已新增加班类型: ${val}`);
+    }
+
+    function deleteOtType(id) {
+      overtimeTypes = overtimeTypes.filter(t => t.id !== id);
+      renderOtTypesList();
+      showToast("已删除该加班类型");
+    }
+
+    function renderSummary() {
+      let totalAnnualRemain = 0;
+      let totalSickRemain = 0;
+      let totalCompRemain = 0;
+
+      employees.forEach(e => {
+        totalAnnualRemain += e.annualRemainHours;
+        totalSickRemain += e.sickRemainHours;
+        totalCompRemain += e.compLeaveHours;
+      });
+
+      document.getElementById('sum-annual-remain').innerText = `${totalAnnualRemain}h`;
+      document.getElementById('sum-sick-remain').innerText = `${totalSickRemain}h`;
+      document.getElementById('sum-comp-remain').innerText = `${totalCompRemain}h`;
+      document.getElementById('sum-emp-count-badge').innerText = `共 ${employees.length} 人`;
+
+      const table = document.getElementById('summary-member-table');
+      table.innerHTML = '';
+
+      employees.forEach(emp => {
+        const row = document.createElement('div');
+        row.className = "p-3 flex items-center justify-between hover:bg-white/[0.04] transition cursor-pointer text-xs";
+        row.onclick = () => showToast(`查看 ${emp.name} 的逐日考勤与扣减明细`);
+        const recCount = emp.records ? emp.records.length : 0;
+        row.innerHTML = `
+          <div class="flex items-center gap-2.5">
+            <img src="${emp.avatar}" class="w-8 h-8 rounded-full object-cover border border-white/[0.1]">
+            <div>
+              <div class="font-bold text-white">${emp.name} <span class="font-mono text-slate-400 font-normal">(${emp.no})</span></div>
+              <div class="text-[11px] text-slate-400 mt-0.5">
+                年假余 <span class="text-emerald-400 font-semibold">${emp.annualRemainHours}h</span> · 病假余 <span class="text-rose-400 font-semibold">${emp.sickRemainHours}h</span>
+              </div>
+            </div>
+          </div>
+          <div class="text-right">
+            <div class="font-bold text-purple-400">调休存: ${emp.compLeaveHours}h</div>
+            <div class="text-[10px] ${recCount > 0 ? 'text-amber-400 font-medium' : 'text-slate-500'} mt-0.5">今日${recCount > 0 ? recCount + '条记录' : '全勤'} &gt;</div>
+          </div>
+        `;
+        table.appendChild(row);
+      });
+    }
+
+    function navigateTo(tab) {
+      document.getElementById('tab-daily').classList.add('hidden');
+      document.getElementById('tab-summary').classList.add('hidden');
+      document.getElementById('tab-members').classList.add('hidden');
+
+      document.getElementById('btn-nav-daily').className = "flex flex-col items-center gap-0.5 text-slate-400 hover:text-slate-200 transition";
+      document.getElementById('btn-nav-summary').className = "flex flex-col items-center gap-0.5 text-slate-400 hover:text-slate-200 transition";
+      document.getElementById('btn-nav-members').className = "flex flex-col items-center gap-0.5 text-slate-400 hover:text-slate-200 transition";
+
+      const titleEl = document.getElementById('header-title');
+      const subtitleEl = document.getElementById('header-subtitle');
+
+      if (tab === 'daily') {
+        document.getElementById('tab-daily').classList.remove('hidden');
+        document.getElementById('btn-nav-daily').className = "flex flex-col items-center gap-0.5 text-cyan-400 transition";
+        titleEl.innerText = "华星园社区";
+        subtitleEl.innerText = `AI 智能考勤 · 假勤多维感知 (共${employees.length}人)`;
+        renderDailyList();
+      } else if (tab === 'summary') {
+        document.getElementById('tab-summary').classList.remove('hidden');
+        document.getElementById('btn-nav-summary').className = "flex flex-col items-center gap-0.5 text-cyan-400 transition";
+        titleEl.innerText = "假期额度与汇总";
+        subtitleEl.innerText = "年假·病假消耗与调休池对账";
+        renderSummary();
+      } else if (tab === 'members') {
+        document.getElementById('tab-members').classList.remove('hidden');
+        document.getElementById('btn-nav-members').className = "flex flex-col items-center gap-0.5 text-cyan-400 transition";
+        titleEl.innerText = "员工花名册";
+        subtitleEl.innerText = "单独编辑档案与批量假期配置";
+        renderRosterList();
+      }
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById('toast-bar');
+      document.getElementById('toast-msg').innerText = msg;
+      toast.classList.remove('opacity-0');
+      toast.classList.add('opacity-100');
+      setTimeout(() => {
+        toast.classList.remove('opacity-100');
+        toast.classList.add('opacity-0');
+      }, 1800);
+    }
+
+    function exportExcelReport() {
+      showToast("正在导出: 2026年11月考勤与假期余额流水表.xlsx");
+    }
+
+    function switchDate(delta) {
+      showToast(delta > 0 ? "已切换至明天" : "已切换至昨天");
+    }
+
+    renderDailyList();
+  </script>
+</body>
+</html>

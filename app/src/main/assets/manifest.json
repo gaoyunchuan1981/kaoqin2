@@ -1,0 +1,16 @@
+{
+  "name": "华星园社区-考勤管理",
+  "short_name": "华星园考勤",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#090D18",
+  "theme_color": "#0B0F1C",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%230B0F1C'/><path d='M50 15L62 38L85 50L62 62L50 85L38 62L15 50L38 38Z' fill='%2306B6D4'/></svg>",
+      "sizes": "192x192 512x512",
+      "type": "image/svg+xml"
+    }
+  ]
+}
