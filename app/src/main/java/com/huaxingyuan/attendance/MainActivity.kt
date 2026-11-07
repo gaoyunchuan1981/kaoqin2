@@ -4,7 +4,12 @@ import android.annotation.SuppressLint
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import android.webkit.*
+import android.webkit.ValueCallback
+import android.webkit.WebChromeClient
+import android.webkit.WebResourceRequest
+import android.webkit.WebSettings
+import android.webkit.WebView
+import android.webkit.WebViewClient
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
@@ -34,7 +39,7 @@ class MainActivity : AppCompatActivity() {
         webView = WebView(this)
         setContentView(webView)
 
-        // 配置现代 WebView 运行环境
+        // Enable hardware accelerated modern WebView
         webView.settings.apply {
             javaScriptEnabled = true
             domStorageEnabled = true
@@ -54,7 +59,6 @@ class MainActivity : AppCompatActivity() {
         }
 
         webView.webChromeClient = object : WebChromeClient() {
-            // 支持相册或拍照文件选择
             override fun onShowFileChooser(
                 mWebView: WebView?,
                 filePathCallback: ValueCallback<Array<Uri>>?,
@@ -78,7 +82,7 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        // 拦截物理返回键
+        // Back button support
         onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
                 if (webView.canGoBack()) {
@@ -89,7 +93,7 @@ class MainActivity : AppCompatActivity() {
             }
         })
 
-        // 加载打包在本地 assets 中的全功能交互应用
+        // Load local interactive assets
         webView.loadUrl("file:///android_asset/index.html")
     }
 
