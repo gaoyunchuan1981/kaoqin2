@@ -315,8 +315,13 @@
         <p class="text-[11px] text-slate-400 mt-0.5" id="header-subtitle">AI 智能考勤 · 假勤多维感知</p>
       </div>
 
-      <!-- 明暗主题切换开关 (默认“明”，可切换“暗”) -->
-      <div class="flex items-center">
+      <!-- 环境指示与明暗主题切换 -->
+      <div class="flex items-center gap-2">
+        <button id="top-env-badge" onclick="openServerConfigModal()" class="px-2.5 py-1 rounded-full text-[10px] font-bold border transition flex items-center gap-1 shadow-xs cursor-pointer bg-indigo-950/60 border-indigo-500/30 text-indigo-300" title="点击查看/切换运行环境与数据库">
+          <span id="top-env-dot" class="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-pulse"></span>
+          <span id="top-env-text">🧪 本地测试库</span>
+        </button>
+
         <div id="theme-segmented-switch" class="inline-flex items-center p-0.5 rounded-full border border-slate-300/80 bg-slate-200/80 backdrop-blur-md shadow-xs select-none transition-all cursor-pointer" onclick="toggleTheme()" title="点击切换明/暗模式">
           <div id="pill-opt-light" onclick="event.stopPropagation(); toggleTheme('light')" class="flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold transition-all shadow-xs bg-white text-indigo-700">
             <span class="text-xs">☀️</span>
@@ -983,30 +988,45 @@
     </div>
   </div>
 
-  <!-- 云端服务器与 SQLite 数据库配置弹窗 -->
+  <!-- 运行环境与数据库配置弹窗 (本地测试库 vs 阿里云生产库) -->
   <div id="modal-server-config" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
     <div class="glass-card bg-[#0D1527] border border-white/15 rounded-3xl w-full max-w-sm p-5 space-y-4 shadow-2xl relative">
       <div class="flex items-center justify-between border-b border-white/[0.08] pb-3">
         <div class="flex items-center gap-2">
-          <div class="w-8 h-8 rounded-xl bg-cyan-500/20 border border-cyan-500/30 flex items-center justify-center text-cyan-400">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 00-9.78 2.096A4.001 4.001 0 003 15z"/></svg>
+          <div id="modal-env-icon" class="w-8 h-8 rounded-xl bg-purple-500/20 border border-purple-500/30 flex items-center justify-center text-purple-400 text-sm">
+            🧪
           </div>
           <div>
-            <h3 class="font-bold text-white text-sm">云端 SQLite 数据库连接</h3>
-            <p class="text-[10px] text-slate-400">连接阿里云服务器，实现跨手机实时同步</p>
+            <h3 id="modal-env-title" class="font-bold text-white text-sm">运行环境与数据库</h3>
+            <p id="modal-env-sub" class="text-[10px] text-slate-400">本地测试与阿里云正式库完全隔离</p>
           </div>
         </div>
         <button onclick="closeServerConfigModal()" class="text-slate-400 hover:text-white p-1">✕</button>
       </div>
 
       <div class="space-y-3">
+        <!-- 分段选择当前环境 -->
         <div>
-          <label class="block text-[11px] text-slate-300 font-medium mb-1.5">阿里云 API 服务地址</label>
-          <input id="input-server-url" type="text" placeholder="http://39.106.69.203:3000/api" class="w-full bg-slate-900/90 border border-white/15 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400 transition" />
-          <p class="text-[10px] text-slate-400 mt-1 leading-relaxed">
-            * 填入您的阿里云服务器公网 IP，端口默认 3000。<br>
-            * 请确保阿里云控制台安全组已放行 3000 端口。
-          </p>
+          <label class="block text-[11px] text-slate-300 font-medium mb-1.5">当前工作环境</label>
+          <div class="grid grid-cols-2 gap-1 p-1 bg-slate-900/90 rounded-2xl border border-white/10 text-xs">
+            <button id="btn-env-test" type="button" onclick="switchEnvironment('test')" class="py-2 rounded-xl font-bold transition flex items-center justify-center gap-1.5">
+              <span>🧪</span> 本地测试环境
+            </button>
+            <button id="btn-env-prod" type="button" onclick="switchEnvironment('prod')" class="py-2 rounded-xl font-bold transition flex items-center justify-center gap-1.5">
+              <span>☁️</span> 阿里云生产环境
+            </button>
+          </div>
+          <div id="env-explain-card" class="mt-2 text-[10px] leading-relaxed p-2.5 rounded-xl border">
+            <!-- 动态说明文字 -->
+          </div>
+        </div>
+
+        <div>
+          <div class="flex items-center justify-between mb-1.5">
+            <label id="label-api-server" class="text-[11px] text-slate-300 font-medium">API 服务地址</label>
+            <button type="button" onclick="resetDefaultEnvUrl()" class="text-[10px] text-cyan-400 hover:underline">恢复默认</button>
+          </div>
+          <input id="input-server-url" type="text" class="w-full bg-slate-900/90 border border-white/15 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400 transition" />
         </div>
 
         <div id="server-test-result" class="hidden text-[11px] px-3 py-2 rounded-xl bg-slate-800/60 border border-white/10 flex items-center gap-2">
@@ -1015,16 +1035,16 @@
         </div>
       </div>
 
-      <div class="space-y-2 pt-2">
+      <div class="space-y-2 pt-1">
         <button onclick="testServerConnection()" id="btn-test-server" class="w-full py-2.5 rounded-xl bg-white/[0.06] hover:bg-white/[0.1] border border-white/10 text-cyan-300 text-xs font-semibold active:scale-98 transition flex items-center justify-center gap-1.5">
           <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-          测试连通性
+          测试当前数据库连通性
         </button>
         <button onclick="saveServerConfigAndSync()" class="w-full py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 to-indigo-600 text-white text-xs font-bold shadow-lg shadow-cyan-500/25 active:scale-98 transition">
-          保存并立即同步云端数据
+          保存并立即同步该环境数据
         </button>
         <div class="pt-2 border-t border-white/[0.08] flex items-center justify-between">
-          <span class="text-[11px] text-slate-300">本地离线数据备份</span>
+          <span class="text-[11px] text-slate-300">当前环境数据备份</span>
           <div class="flex gap-2">
             <button onclick="exportDataBackup()" class="px-2.5 py-1 text-[11px] rounded-lg bg-white/10 hover:bg-white/20 text-white transition">导出备份</button>
             <button onclick="document.getElementById('input-restore-file').click()" class="px-2.5 py-1 text-[11px] rounded-lg bg-cyan-600/30 hover:bg-cyan-600/50 text-cyan-300 border border-cyan-500/30 transition">导入还原</button>
@@ -1032,7 +1052,7 @@
           </div>
         </div>
         <button onclick="clearCacheAndSyncFromCloud()" class="w-full py-2 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/20 text-rose-300 text-[11px] active:scale-98 transition">
-          清空本地缓存并从云端重新拉取
+          清空当前环境本地缓存并重新拉取
         </button>
       </div>
     </div>
@@ -1046,11 +1066,114 @@
 
   <!-- 原型核心逻辑脚本 -->
   <script>
-    // ================= 阿里云 SQLite 云端数据库连接模块 =================
-    let API_BASE = localStorage.getItem('huaxingyuan_api_server') || 'http://39.106.69.203:3000/api';
+    // ================= 环境与数据库路由模块 (本地独立测试 vs 阿里云生产) =================
+    const PROD_API_DEFAULT = 'http://39.106.69.203:3000/api';
+
+    function getLocalTestApiDefault() {
+      if (window.location.protocol.startsWith('http')) {
+        return `${window.location.protocol}//${window.location.host}/api`;
+      }
+      return 'http://localhost:3000/api';
+    }
+
+    // 智能环境检测：
+    // - Android 原生 APP (file://协议) -> 默认为 prod (生产环境)
+    // - 阿里云服务器网页 (39.106.69.203) -> 默认为 prod
+    // - 本地浏览器预览 (localhost / 127.0.0.1 / 192.168.x.x 等) -> 默认为 test (本地测试环境)
+    const isLocalBrowser = (
+      window.location.hostname === 'localhost' ||
+      window.location.hostname === '127.0.0.1' ||
+      window.location.hostname.startsWith('192.168.') ||
+      window.location.hostname.startsWith('10.') ||
+      (window.location.protocol.startsWith('http') && window.location.hostname !== '39.106.69.203')
+    );
+
+    let currentEnv = localStorage.getItem('huaxingyuan_env');
+    if (!currentEnv) {
+      currentEnv = isLocalBrowser ? 'test' : 'prod';
+    }
+
+    function getEnvApi(env) {
+      const saved = localStorage.getItem(`huaxingyuan_api_${env}`);
+      if (saved) return saved;
+      return env === 'test' ? getLocalTestApiDefault() : PROD_API_DEFAULT;
+    }
+
+    let API_BASE = getEnvApi(currentEnv);
+
+    function getStorageKey(baseKey) {
+      return `${baseKey}_${currentEnv}`;
+    }
+
+    function updateEnvModalUI() {
+      const btnTest = document.getElementById('btn-env-test');
+      const btnProd = document.getElementById('btn-env-prod');
+      const explainCard = document.getElementById('env-explain-card');
+      const inputUrl = document.getElementById('input-server-url');
+      const modalIcon = document.getElementById('modal-env-icon');
+      const modalTitle = document.getElementById('modal-env-title');
+
+      if (!btnTest || !btnProd) return;
+
+      if (currentEnv === 'test') {
+        btnTest.className = "py-2 rounded-xl font-bold transition flex items-center justify-center gap-1.5 bg-purple-600 text-white shadow-md shadow-purple-600/30";
+        btnProd.className = "py-2 rounded-xl font-medium transition flex items-center justify-center gap-1.5 text-slate-400 hover:text-white";
+        if (explainCard) {
+          explainCard.className = "mt-2 text-[10px] leading-relaxed p-2.5 rounded-xl border bg-purple-950/30 border-purple-500/20 text-purple-300";
+          explainCard.innerHTML = `🧪 <strong>本地独立测试环境</strong><br>连接电脑本地测试库 (<code>local_test_db.json</code>)，用于功能测试与演示，<strong>绝不影响阿里云正式考勤数据</strong>。`;
+        }
+        if (modalIcon) {
+          modalIcon.innerText = "🧪";
+          modalIcon.className = "w-8 h-8 rounded-xl bg-purple-500/20 border border-purple-500/30 flex items-center justify-center text-purple-400 text-sm";
+        }
+        if (modalTitle) modalTitle.innerText = "本地测试数据库配置";
+      } else {
+        btnProd.className = "py-2 rounded-xl font-bold transition flex items-center justify-center gap-1.5 bg-emerald-600 text-white shadow-md shadow-emerald-600/30";
+        btnTest.className = "py-2 rounded-xl font-medium transition flex items-center justify-center gap-1.5 text-slate-400 hover:text-white";
+        if (explainCard) {
+          explainCard.className = "mt-2 text-[10px] leading-relaxed p-2.5 rounded-xl border bg-emerald-950/30 border-emerald-500/20 text-emerald-300";
+          explainCard.innerHTML = `☁️ <strong>阿里云生产环境</strong><br>连接阿里云轻量服务器数据库，存储社区真实员工考勤数据，跨手机实时同步。`;
+        }
+        if (modalIcon) {
+          modalIcon.innerText = "☁️";
+          modalIcon.className = "w-8 h-8 rounded-xl bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-emerald-400 text-sm";
+        }
+        if (modalTitle) modalTitle.innerText = "阿里云生产数据库配置";
+      }
+
+      if (inputUrl) {
+        inputUrl.value = API_BASE;
+      }
+    }
+
+    function updateCloudStatusBadge(status, customText) {
+      const badge = document.getElementById('top-env-badge');
+      const dot = document.getElementById('top-env-dot');
+      const text = document.getElementById('top-env-text');
+      if (!badge || !dot || !text) return;
+
+      const isTest = (currentEnv === 'test');
+
+      if (status === true) {
+        dot.className = `w-1.5 h-1.5 rounded-full ${isTest ? 'bg-purple-400 animate-pulse' : 'bg-emerald-400 animate-pulse'}`;
+        text.innerText = customText || (isTest ? "🧪 本地测试库" : "☁️ 阿里云生产库");
+        badge.className = `px-2.5 py-1 rounded-full text-[10px] font-bold border transition flex items-center gap-1 shadow-xs cursor-pointer ${
+          isTest 
+            ? 'bg-purple-950/70 border-purple-500/40 text-purple-300 shadow-[0_0_12px_rgba(168,85,247,0.2)]'
+            : 'bg-emerald-950/70 border-emerald-500/40 text-emerald-300 shadow-[0_0_12px_rgba(16,185,129,0.2)]'
+        }`;
+      } else if (status === false) {
+        dot.className = "w-1.5 h-1.5 rounded-full bg-amber-400";
+        text.innerText = customText || (isTest ? "🧪 本地离线" : "☁️ 阿里云离线");
+        badge.className = "px-2.5 py-1 rounded-full text-[10px] font-bold border transition flex items-center gap-1 shadow-xs cursor-pointer bg-slate-800/80 border-white/10 text-slate-300";
+      } else {
+        dot.className = `w-1.5 h-1.5 rounded-full ${isTest ? 'bg-purple-400' : 'bg-cyan-400'} animate-ping`;
+        text.innerText = customText || "连接中...";
+      }
+    }
 
     function openServerConfigModal() {
-      document.getElementById('input-server-url').value = API_BASE;
+      updateEnvModalUI();
       document.getElementById('server-test-result').classList.add('hidden');
       document.getElementById('modal-server-config').classList.remove('hidden');
     }
@@ -1059,23 +1182,28 @@
       document.getElementById('modal-server-config').classList.add('hidden');
     }
 
-    function updateCloudStatusBadge(status, text) {
-      const dot = document.getElementById('cloud-status-dot');
-      const txt = document.getElementById('cloud-status-text');
-      const btn = document.getElementById('cloud-status-btn');
-      if (!dot || !txt || !btn) return;
-      if (status === true) {
-        dot.className = "w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse";
-        txt.innerText = text || "已连数据库";
-        btn.className = "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-950/60 border border-emerald-500/30 text-emerald-300 text-[10px] font-medium backdrop-blur-md active:scale-95 transition shadow-[0_0_10px_rgba(16,185,129,0.2)]";
-      } else if (status === false) {
-        dot.className = "w-1.5 h-1.5 rounded-full bg-amber-400";
-        txt.innerText = text || "配置云端";
-        btn.className = "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-800/80 border border-white/10 text-slate-300 text-[10px] font-medium backdrop-blur-md active:scale-95 transition";
-      } else {
-        dot.className = "w-1.5 h-1.5 rounded-full bg-cyan-400 animate-ping";
-        txt.innerText = text || "连接中...";
-      }
+    function resetDefaultEnvUrl() {
+      const defaultUrl = currentEnv === 'test' ? getLocalTestApiDefault() : PROD_API_DEFAULT;
+      document.getElementById('input-server-url').value = defaultUrl;
+    }
+
+    async function switchEnvironment(env) {
+      if (currentEnv === env) return;
+      currentEnv = env;
+      localStorage.setItem('huaxingyuan_env', env);
+      API_BASE = getEnvApi(env);
+
+      updateEnvModalUI();
+      updateCloudStatusBadge(null, "正在切换环境...");
+
+      // 切换对应环境的本地缓存数据
+      loadLocalStateForCurrentEnv();
+      renderDailyList();
+      renderSummary();
+      renderRosterList();
+
+      showToast(env === 'test' ? "🧪 已切换至 [本地测试环境]" : "☁️ 已切换至 [阿里云生产环境]");
+      await syncDataFromCloud();
     }
 
     async function testServerConnection() {
@@ -1096,7 +1224,7 @@
       const resultText = document.getElementById('server-test-text');
       resultBox.classList.remove('hidden');
       resultIcon.innerText = "⏳";
-      resultText.innerText = "正在测试连接阿里云数据库...";
+      resultText.innerText = `正在测试连接 [${currentEnv === 'test' ? '本地测试服务' : '阿里云生产服务器'}]...`;
 
       const startTime = Date.now();
       try {
@@ -1105,7 +1233,8 @@
         const latency = Date.now() - startTime;
         if (data.success) {
           resultIcon.innerText = "✅";
-          resultText.innerText = `连接成功！已检测到 SQLite 数据库 (${latency}ms)`;
+          const dbLabel = data.env === 'local_test' ? '本地独立测试库 (local_test_db.json)' : '生产持久化数据库';
+          resultText.innerText = `连接成功！检测到【${dbLabel}】(${latency}ms)`;
           resultText.className = "text-emerald-400 font-medium";
         } else {
           resultIcon.innerText = "⚠️";
@@ -1114,7 +1243,7 @@
         }
       } catch (err) {
         resultIcon.innerText = "❌";
-        resultText.innerText = "连接失败，请检查 IP 与 3000 端口安全组！";
+        resultText.innerText = `连接失败: 无法访问 ${url}，请检查服务是否运行或端口放行！`;
         resultText.className = "text-rose-400";
       }
     }
@@ -1127,15 +1256,15 @@
         if (!url.endsWith('/api')) url += '/api';
       }
       API_BASE = url;
-      localStorage.setItem('huaxingyuan_api_server', API_BASE);
+      localStorage.setItem(`huaxingyuan_api_${currentEnv}`, API_BASE);
       closeServerConfigModal();
-      showToast(API_BASE ? "正在从阿里云拉取全员数据..." : "已切换为本地模式");
+      showToast(`已保存并同步 [${currentEnv === 'test' ? '本地测试' : '阿里云生产'}] 数据...`);
       await syncDataFromCloud();
     }
 
     async function syncDataFromCloud() {
       if (!API_BASE) {
-        updateCloudStatusBadge(false, "配置云端");
+        updateCloudStatusBadge(false, "配置服务");
         return;
       }
       updateCloudStatusBadge(null, "正在同步...");
@@ -1150,9 +1279,9 @@
         const recJson = await recRes.json();
 
         if (empJson.success && Array.isArray(empJson.data)) {
-          if (empJson.data.length === 0 && employees.length > 0) {
-            // 云端为空但本地有数据：主动将本地员工档案与记录同步上传到阿里云备份，防止空云端覆盖本地！
-            console.log("检测到云端数据库为空，正在将本地数据自动备份同步至阿里云...");
+          if (empJson.data.length === 0 && employees.length > 0 && currentEnv === 'prod') {
+            // 仅在生产环境下：若云端首次为空但本地有数据，主动备份到云端
+            console.log("检测到生产云端为空，自动备份本地数据至阿里云...");
             for (const emp of employees) {
               await fetch(`${API_BASE}/employees`, {
                 method: 'POST',
@@ -1160,7 +1289,7 @@
                 body: JSON.stringify(emp)
               }).catch(() => {});
             }
-            updateCloudStatusBadge(true, "已同步云端");
+            updateCloudStatusBadge(true);
             showToast("☁️ 已将本地录入的数据自动备份上传至阿里云！");
           } else {
             const empMap = {};
@@ -1180,14 +1309,16 @@
             renderDailyList();
             renderSummary();
             renderRosterList();
-            updateCloudStatusBadge(true, "已连数据库");
-            showToast("☁️ 已成功同步阿里云 SQLite 数据库");
+            updateCloudStatusBadge(true);
+            const envName = currentEnv === 'test' ? '本地测试库' : '阿里云生产库';
+            showToast(`✅ 已同步 [${envName}] 数据 (共 ${employees.length} 人)`);
           }
         }
       } catch (err) {
-        console.warn("云端同步失败，使用本地缓存:", err);
-        updateCloudStatusBadge(false, "连接离线");
+        console.warn("同步失败，使用本地缓存:", err);
+        updateCloudStatusBadge(false);
       }
+    }
     }
 
     // ================= 全局明/暗模式管理 (默认“明”，可切换“暗”) =================
@@ -1284,8 +1415,12 @@
 
     function persistLocalState() {
       try {
-        localStorage.setItem('huaxingyuan_employees_data', JSON.stringify(employees));
-        localStorage.setItem('huaxingyuan_overtime_types', JSON.stringify(overtimeTypes));
+        localStorage.setItem(getStorageKey('huaxingyuan_employees_data'), JSON.stringify(employees));
+        localStorage.setItem(getStorageKey('huaxingyuan_overtime_types'), JSON.stringify(overtimeTypes));
+        if (currentEnv === 'prod') {
+          localStorage.setItem('huaxingyuan_employees_data', JSON.stringify(employees));
+          localStorage.setItem('huaxingyuan_overtime_types', JSON.stringify(overtimeTypes));
+        }
       } catch (e) {
         console.warn('LocalStorage save failed:', e);
       }
@@ -1295,6 +1430,7 @@
       try {
         const backupData = {
           version: "1.0.0",
+          env: currentEnv,
           exportTime: new Date().toISOString(),
           employees: employees,
           overtimeTypes: overtimeTypes
@@ -1303,12 +1439,13 @@
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `huaxingyuan_backup_${getTodayDateStr()}.json`;
+        const envLabel = currentEnv === 'test' ? 'test' : 'prod';
+        a.download = `huaxingyuan_${envLabel}_backup_${getTodayDateStr()}.json`;
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
-        showToast("📦 考勤数据已成功导出为本地 JSON 备份文件！");
+        showToast(`📦 [${currentEnv === 'test' ? '测试库' : '生产库'}] 考勤数据已成功导出为备份！`);
       } catch (err) {
         navigator.clipboard.writeText(JSON.stringify(employees, null, 2))
           .then(() => showToast("📋 备份数据已复制到手机剪贴板！"))
@@ -1333,7 +1470,7 @@
           renderDailyList();
           renderSummary();
           renderRosterList();
-          showToast(`✅ 成功还原 ${employees.length} 位员工档案及记录！`);
+          showToast(`✅ 成功还原 ${employees.length} 位员工档案及记录至 [${currentEnv === 'test' ? '测试环境' : '生产环境'}]！`);
           if (API_BASE) {
             for (const emp of employees) {
               await fetch(`${API_BASE}/employees`, {
@@ -1352,8 +1489,12 @@
     }
 
     function clearCacheAndSyncFromCloud() {
-      if (confirm('确认要清空本地缓存并从云端数据库重新拉取全员数据吗？')) {
-        localStorage.removeItem('huaxingyuan_employees_data');
+      const envName = currentEnv === 'test' ? '本地测试环境' : '阿里云生产环境';
+      if (confirm(`确认要清空【${envName}】本地缓存并从对应数据库重新拉取全员数据吗？`)) {
+        localStorage.removeItem(getStorageKey('huaxingyuan_employees_data'));
+        if (currentEnv === 'prod') {
+          localStorage.removeItem('huaxingyuan_employees_data');
+        }
         employees = [];
         persistLocalState();
         renderDailyList();
@@ -1362,46 +1503,53 @@
         if (API_BASE) {
           syncDataFromCloud();
         } else {
-          showToast('已清空本地缓存！');
+          showToast(`已清空【${envName}】本地缓存！`);
         }
       }
     }
 
-    // 初始化加班类型持久化
-    const savedOtTypes = localStorage.getItem('huaxingyuan_overtime_types');
-    if (savedOtTypes) {
-      try {
-        overtimeTypes = JSON.parse(savedOtTypes);
-      } catch (e) {
-        overtimeTypes = JSON.parse(JSON.stringify(defaultOvertimeTypes));
+    function loadLocalStateForCurrentEnv() {
+      let saved = localStorage.getItem(getStorageKey('huaxingyuan_employees_data'));
+      if (!saved && currentEnv === 'prod') {
+        saved = localStorage.getItem('huaxingyuan_employees_data');
       }
-    } else {
-      overtimeTypes = JSON.parse(JSON.stringify(defaultOvertimeTypes));
-    }
-
-    // 初始化员工与考勤记录持久化（支持向前兼容未标日期的记录）
-    const savedEmployees = localStorage.getItem('huaxingyuan_employees_data');
-    if (savedEmployees) {
-      try {
-        employees = JSON.parse(savedEmployees);
-        if (Array.isArray(employees)) {
-          employees.forEach(emp => {
-            if (emp.records && Array.isArray(emp.records)) {
-              emp.records.forEach(r => {
-                if (!r.date) r.date = todayStr;
-              });
-            }
-          });
-        } else {
+      if (saved) {
+        try {
+          employees = JSON.parse(saved);
+          if (Array.isArray(employees)) {
+            employees.forEach(emp => {
+              if (emp.records && Array.isArray(emp.records)) {
+                emp.records.forEach(r => {
+                  if (!r.date) r.date = todayStr;
+                });
+              }
+            });
+          } else {
+            employees = [];
+          }
+        } catch (e) {
           employees = [];
         }
-      } catch (e) {
+      } else {
         employees = [];
       }
-    } else {
-      employees = [];
-      persistLocalState();
+
+      let savedOt = localStorage.getItem(getStorageKey('huaxingyuan_overtime_types'));
+      if (!savedOt && currentEnv === 'prod') {
+        savedOt = localStorage.getItem('huaxingyuan_overtime_types');
+      }
+      if (savedOt) {
+        try {
+          overtimeTypes = JSON.parse(savedOt);
+        } catch (e) {
+          overtimeTypes = JSON.parse(JSON.stringify(defaultOvertimeTypes));
+        }
+      } else {
+        overtimeTypes = JSON.parse(JSON.stringify(defaultOvertimeTypes));
+      }
     }
+
+    loadLocalStateForCurrentEnv();
 
     let activeEmpId = null;
     let selectedLeaveType = "年假";
@@ -3208,13 +3356,17 @@
       if (API_BASE) syncDataFromCloud();
     }
 
+    loadLocalStateForCurrentEnv();
     updateDateDisplay();
     renderDailyList();
+    renderSummary();
+    renderRosterList();
     applyTheme(currentTheme);
+    updateCloudStatusBadge(null, "正在连接...");
     if (API_BASE) {
       syncDataFromCloud();
     } else {
-      updateCloudStatusBadge(false, "配置云端");
+      updateCloudStatusBadge(false, "配置服务");
     }
   </script>
 </body>
