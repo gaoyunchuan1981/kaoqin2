@@ -534,7 +534,7 @@
       <div class="space-y-3">
         <div>
           <label class="block text-[11px] text-slate-300 font-medium mb-1.5">阿里云 API 服务地址</label>
-          <input id="input-server-url" type="text" placeholder="例如: http://47.xxx.xxx.xxx:3000/api" class="w-full bg-slate-900/90 border border-white/15 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400 transition" />
+          <input id="input-server-url" type="text" placeholder="http://39.106.69.203:3000/api" class="w-full bg-slate-900/90 border border-white/15 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400 transition" />
           <p class="text-[10px] text-slate-400 mt-1 leading-relaxed">
             * 填入您的阿里云服务器公网 IP，端口默认 3000。<br>
             * 请确保阿里云控制台安全组已放行 3000 端口。
@@ -568,7 +568,7 @@
   <!-- 原型核心逻辑脚本 -->
   <script>
     // ================= 阿里云 SQLite 云端数据库连接模块 =================
-    let API_BASE = localStorage.getItem('huaxingyuan_api_server') || '';
+    let API_BASE = localStorage.getItem('huaxingyuan_api_server') || 'http://39.106.69.203:3000/api';
 
     function openServerConfigModal() {
       document.getElementById('input-server-url').value = API_BASE;
