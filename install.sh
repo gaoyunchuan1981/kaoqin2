@@ -9,10 +9,10 @@ echo "=================================================="
 mkdir -p ~/kaoqin2/server
 cd ~/kaoqin2/server
 
-# 2. 下载必要核心文件
-echo "📥 正在下载后端生产服务与配置..."
-curl -sSL "https://cdn.jsdelivr.net/gh/gaoyunchuan1981/kaoqin2@main/server/package.json" -o package.json
-curl -sSL "https://cdn.jsdelivr.net/gh/gaoyunchuan1981/kaoqin2@main/server/server.js" -o server.js
+# 2. 下载必要核心文件 (使用不可变提交哈希，杜绝国内 CDN 缓存旧版本)
+echo "📥 正在下载免编译版后端生产服务与配置..."
+curl -sSL "https://cdn.jsdelivr.net/gh/gaoyunchuan1981/kaoqin2@12e4110/server/package.json" -o package.json
+curl -sSL "https://cdn.jsdelivr.net/gh/gaoyunchuan1981/kaoqin2@12e4110/server/server.js" -o server.js
 
 # 3. 安装纯 JS 依赖 (免除了 C++ 编译与 node-gyp 依赖，秒级完成)
 echo "📦 正在安装依赖 (express, cors, multer)..."
