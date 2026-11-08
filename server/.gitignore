@@ -1,0 +1,9 @@
+attendance.db
+*.sqlite
+*.sqlite3
+*.db
+uploads/
+data/
+.env
+node_modules/
+npm-debug.log*

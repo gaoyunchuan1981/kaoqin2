@@ -12,13 +12,14 @@ const multer = require('multer');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+const HOST = '0.0.0.0';
 
 // 中间件配置
 app.use(cors());
 app.use(express.json());
 
 // 上传头像存储配置
-const UPLOADS_DIR = path.join(__dirname, 'uploads');
+const UPLOADS_DIR = process.env.ATTENDANCE_UPLOADS_DIR || path.join(__dirname, 'uploads');
 if (!fs.existsSync(UPLOADS_DIR)) {
   fs.mkdirSync(UPLOADS_DIR, { recursive: true });
 }
@@ -34,7 +35,7 @@ const storage = multer.diskStorage({
 const upload = multer({ storage, limits: { fileSize: 5 * 1024 * 1024 } });
 
 // 数据库初始化
-const DB_PATH = path.join(__dirname, 'attendance.db');
+const DB_PATH = process.env.ATTENDANCE_DB_PATH || path.join(__dirname, 'attendance.db');
 const db = new sqlite3.Database(DB_PATH);
 
 db.serialize(() => {
@@ -75,9 +76,9 @@ db.serialize(() => {
         VALUES (?, ?, ?, ?, ?, ?)
       `);
       stmt.run("EMP-001", "陈晓", "13800138001", "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150", 40, 80);
-      stmt.run("EMP-002", "张健", "13912345678", "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150", 64, 72);
-      stmt.run("EMP-003", "李慧敏", "13766668888", "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150", 32, 80);
-      stmt.run("EMP-004", "王强", "15988889999", "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150", 56, 64);
+      stmt.run("EMP-002", "张健", "13912345678", "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150", 80, 80);
+      stmt.run("EMP-003", "李慧敏", "13766668888", "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=150", 40, 80);
+      stmt.run("EMP-004", "王强", "15988889999", "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150", 64, 80);
       stmt.finalize();
       console.log('✅ 初始化社区员工数据成功！');
     }
@@ -85,6 +86,16 @@ db.serialize(() => {
 });
 
 // ======================= API 路由接口 =======================
+
+// 0. 健康检查与握手接口
+app.get(['/healthz', '/api/health'], (req, res) => {
+  res.json({
+    success: true,
+    service: '华星园社区智能考勤云端 API',
+    database: 'SQLite',
+    serverTime: new Date().toISOString()
+  });
+});
 
 // 1. 获取所有员工列表及其动态计算的实时余量 (年假余量、病假余量、调休池余量)
 app.get('/api/employees', (req, res) => {
@@ -105,15 +116,16 @@ app.get('/api/employees', (req, res) => {
     if (err) return res.status(500).json({ error: err.message });
     const employees = rows.map(r => ({
       id: r.id,
-      empNo: r.emp_no,
+      no: r.emp_no,
       name: r.name,
       phone: r.phone,
       avatar: r.avatar,
-      annualQuota: r.annual_quota,
-      sickQuota: r.sick_quota,
-      annualRemaining: Math.max(0, r.annual_quota - r.annual_used),
-      sickRemaining: Math.max(0, r.sick_quota - r.sick_used),
-      compRemaining: Math.max(0, r.comp_earned - r.comp_used)
+      annualTotalHours: r.annual_quota,
+      sickTotalHours: r.sick_quota,
+      annualRemainHours: Math.max(0, r.annual_quota - r.annual_used),
+      sickRemainHours: Math.max(0, r.sick_quota - r.sick_used),
+      compLeaveHours: Math.max(0, r.comp_earned - r.comp_used),
+      records: []
     }));
     res.json({ success: true, data: employees });
   });
@@ -123,14 +135,24 @@ app.get('/api/employees', (req, res) => {
 app.get('/api/records', (req, res) => {
   const date = req.query.date || new Date().toISOString().split('T')[0];
   db.all(`
-    SELECT r.*, e.name as emp_name, e.emp_no
+    SELECT r.id, r.emp_id, r.date, r.category, r.type_name, r.hours, r.remark, r.created_at,
+           e.name as emp_name, e.emp_no
     FROM attendance_records r
     JOIN employees e ON r.emp_id = e.id
     WHERE r.date = ?
     ORDER BY r.created_at ASC
   `, [date], (err, rows) => {
     if (err) return res.status(500).json({ error: err.message });
-    res.json({ success: true, date, data: rows });
+    const records = rows.map(r => ({
+      id: r.id,
+      empId: r.emp_id,
+      date: r.date,
+      category: r.category,
+      type: r.type_name,
+      hours: r.hours,
+      remark: r.remark
+    }));
+    res.json({ success: true, date, data: records });
   });
 });
 
@@ -149,7 +171,7 @@ app.post('/api/records', (req, res) => {
     if (err) return res.status(500).json({ error: err.message });
     res.json({
       success: true,
-      message: '记录已成功同步到云端',
+      message: '记录已成功同步到云端数据库',
       id: this.lastID
     });
   });
@@ -160,39 +182,76 @@ app.delete('/api/records/:id', (req, res) => {
   const recordId = req.params.id;
   db.run(`DELETE FROM attendance_records WHERE id = ?`, [recordId], function(err) {
     if (err) return res.status(500).json({ error: err.message });
-    res.json({ success: true, message: '记录已撤回删除' });
+    res.json({ success: true, message: '记录已从云端删除并回滚' });
   });
 });
 
-// 5. 更新单个员工的年假/病假初始化额度
-app.put('/api/employees/:id/quotas', (req, res) => {
+// 5. 新增员工档案
+app.post('/api/employees', (req, res) => {
+  const { no, name, phone, avatar, annualTotalHours, sickTotalHours } = req.body;
+  if (!name || !no) {
+    return res.status(400).json({ error: '员工工号和姓名不能为空' });
+  }
+  const stmt = db.prepare(`
+    INSERT INTO employees (emp_no, name, phone, avatar, annual_quota, sick_quota)
+    VALUES (?, ?, ?, ?, ?, ?)
+  `);
+  stmt.run(no, name, phone || '', avatar || '', parseInt(annualTotalHours) || 40, parseInt(sickTotalHours) || 80, function(err) {
+    if (err) return res.status(500).json({ error: err.message });
+    res.json({ success: true, message: '新员工已添加到云端', id: this.lastID });
+  });
+});
+
+// 6. 更新员工档案
+app.put('/api/employees/:id', (req, res) => {
   const empId = req.params.id;
-  const { annualQuota, sickQuota } = req.body;
+  const { name, phone, avatar, annualTotalHours, sickTotalHours } = req.body;
   db.run(`
     UPDATE employees 
-    SET annual_quota = COALESCE(?, annual_quota),
+    SET name = COALESCE(?, name),
+        phone = COALESCE(?, phone),
+        avatar = COALESCE(?, avatar),
+        annual_quota = COALESCE(?, annual_quota),
         sick_quota = COALESCE(?, sick_quota)
     WHERE id = ?
-  `, [annualQuota, sickQuota, empId], function(err) {
+  `, [name, phone, avatar, annualTotalHours, sickTotalHours, empId], function(err) {
     if (err) return res.status(500).json({ error: err.message });
-    res.json({ success: true, message: '员工额度已更新' });
+    res.json({ success: true, message: '员工信息已在云端更新' });
   });
 });
 
-// 6. 批量更新全体员工额度
+// 7. 删除员工档案
+app.delete('/api/employees/:id', (req, res) => {
+  const empId = req.params.id;
+  db.run(`DELETE FROM attendance_records WHERE emp_id = ?`, [empId], (err) => {
+    if (err) return res.status(500).json({ error: err.message });
+    db.run(`DELETE FROM employees WHERE id = ?`, [empId], function(err) {
+      if (err) return res.status(500).json({ error: err.message });
+      res.json({ success: true, message: '员工及其考勤明细已从云端移除' });
+    });
+  });
+});
+
+// 8. 批量更新全体员工额度
 app.post('/api/employees/batch-quotas', (req, res) => {
-  const { annualQuota, sickQuota } = req.body;
+  const { empIds, annualQuota, sickQuota } = req.body;
+  if (!empIds || !empIds.length) {
+    return res.status(400).json({ error: '请选择需要调整的员工' });
+  }
+  const placeholders = empIds.map(() => '?').join(',');
+  const params = [annualQuota, sickQuota, ...empIds];
   db.run(`
     UPDATE employees 
     SET annual_quota = COALESCE(?, annual_quota),
         sick_quota = COALESCE(?, sick_quota)
-  `, [annualQuota, sickQuota], function(err) {
+    WHERE id IN (${placeholders})
+  `, params, function(err) {
     if (err) return res.status(500).json({ error: err.message });
-    res.json({ success: true, message: '全体员工额度批量同步完成' });
+    res.json({ success: true, message: `已成功为 ${this.changes} 名员工同步更新年假/病假额度` });
   });
 });
 
-// 7. 头像上传接口
+// 9. 头像上传接口
 app.post('/api/upload-avatar', upload.single('avatar'), (req, res) => {
   if (!req.file) return res.status(400).json({ error: '请选择文件' });
   const host = req.get('host');
@@ -201,9 +260,9 @@ app.post('/api/upload-avatar', upload.single('avatar'), (req, res) => {
   res.json({ success: true, url: fileUrl });
 });
 
-app.listen(PORT, '0.0.0.0', () => {
+app.listen(PORT, HOST, () => {
   console.log(`\n=================================================`);
-  console.log(`   🚀 华星园社区考勤云端服务已启动: http://localhost:${PORT}`);
-  console.log(`   🗄️ 数据库: SQLite 嵌入式免配置数据库已挂载`);
+  console.log(`   🚀 华星园社区考勤服务已启动: http://${HOST}:${PORT}`);
+  console.log(`   🗄️ SQLite 数据库挂载成功: ${DB_PATH}`);
   console.log(`=================================================\n`);
 });
