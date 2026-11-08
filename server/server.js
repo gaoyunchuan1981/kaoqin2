@@ -66,13 +66,30 @@ console.log('✅ 云端持久化数据库已准备就绪 (生产模式)');
 
 // ======================= API 路由接口 =======================
 
-// 0. 健康检查与握手接口
-app.get(['/healthz', '/api/health'], (req, res) => {
+// 0. 健康检查与握手接口 (支持多路径，确保任何检测都能 100% 连通)
+app.get('/api/health', (req, res) => {
   res.json({
     success: true,
     service: '华星园社区智能考勤云端 API',
     database: 'Persistent JSON Store (Zero-Config)',
     serverTime: new Date().toISOString()
+  });
+});
+
+app.get('/health', (req, res) => {
+  res.json({ success: true, service: '华星园社区智能考勤云端 API' });
+});
+
+app.get('/healthz', (req, res) => {
+  res.json({ success: true, service: '华星园社区智能考勤云端 API' });
+});
+
+app.get('/', (req, res) => {
+  res.json({
+    success: true,
+    service: '华星园社区智能考勤云端 API',
+    status: 'online',
+    endpoints: ['/api/health', '/api/employees', '/api/records']
   });
 });
 
