@@ -1021,8 +1021,16 @@
           测试连通性
         </button>
         <button onclick="saveServerConfigAndSync()" class="w-full py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 to-indigo-600 text-white text-xs font-bold shadow-lg shadow-cyan-500/25 active:scale-98 transition">
-          保存并立即拉取云端数据
+          保存并立即同步云端数据
         </button>
+        <div class="pt-2 border-t border-white/[0.08] flex items-center justify-between">
+          <span class="text-[11px] text-slate-300">本地离线数据备份</span>
+          <div class="flex gap-2">
+            <button onclick="exportDataBackup()" class="px-2.5 py-1 text-[11px] rounded-lg bg-white/10 hover:bg-white/20 text-white transition">导出备份</button>
+            <button onclick="document.getElementById('input-restore-file').click()" class="px-2.5 py-1 text-[11px] rounded-lg bg-cyan-600/30 hover:bg-cyan-600/50 text-cyan-300 border border-cyan-500/30 transition">导入还原</button>
+            <input type="file" id="input-restore-file" accept=".json" class="hidden" onchange="importDataBackup(event)">
+          </div>
+        </div>
         <button onclick="clearCacheAndSyncFromCloud()" class="w-full py-2 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/20 text-rose-300 text-[11px] active:scale-98 transition">
           清空本地缓存并从云端重新拉取
         </button>
@@ -1142,25 +1150,39 @@
         const recJson = await recRes.json();
 
         if (empJson.success && Array.isArray(empJson.data)) {
-          const empMap = {};
-          empJson.data.forEach(e => {
-            e.records = [];
-            empMap[e.id] = e;
-          });
-          if (recJson.success && Array.isArray(recJson.data)) {
-            recJson.data.forEach(r => {
-              if (empMap[r.empId]) {
-                empMap[r.empId].records.push(r);
-              }
+          if (empJson.data.length === 0 && employees.length > 0) {
+            // 云端为空但本地有数据：主动将本地员工档案与记录同步上传到阿里云备份，防止空云端覆盖本地！
+            console.log("检测到云端数据库为空，正在将本地数据自动备份同步至阿里云...");
+            for (const emp of employees) {
+              await fetch(`${API_BASE}/employees`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(emp)
+              }).catch(() => {});
+            }
+            updateCloudStatusBadge(true, "已同步云端");
+            showToast("☁️ 已将本地录入的数据自动备份上传至阿里云！");
+          } else {
+            const empMap = {};
+            empJson.data.forEach(e => {
+              e.records = [];
+              empMap[e.id] = e;
             });
+            if (recJson.success && Array.isArray(recJson.data)) {
+              recJson.data.forEach(r => {
+                if (empMap[r.empId]) {
+                  empMap[r.empId].records.push(r);
+                }
+              });
+            }
+            employees = Object.values(empMap);
+            persistLocalState();
+            renderDailyList();
+            renderSummary();
+            renderRosterList();
+            updateCloudStatusBadge(true, "已连数据库");
+            showToast("☁️ 已成功同步阿里云 SQLite 数据库");
           }
-          employees = Object.values(empMap);
-          persistLocalState();
-          renderDailyList();
-          renderSummary();
-          renderRosterList();
-          updateCloudStatusBadge(true, "已连数据库");
-          showToast("☁️ 已成功同步阿里云 SQLite 数据库");
         }
       } catch (err) {
         console.warn("云端同步失败，使用本地缓存:", err);
@@ -1267,6 +1289,66 @@
       } catch (e) {
         console.warn('LocalStorage save failed:', e);
       }
+    }
+
+    function exportDataBackup() {
+      try {
+        const backupData = {
+          version: "1.0.0",
+          exportTime: new Date().toISOString(),
+          employees: employees,
+          overtimeTypes: overtimeTypes
+        };
+        const blob = new Blob([JSON.stringify(backupData, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `huaxingyuan_backup_${getTodayDateStr()}.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        showToast("📦 考勤数据已成功导出为本地 JSON 备份文件！");
+      } catch (err) {
+        navigator.clipboard.writeText(JSON.stringify(employees, null, 2))
+          .then(() => showToast("📋 备份数据已复制到手机剪贴板！"))
+          .catch(() => alert("导出失败：" + err.message));
+      }
+    }
+
+    function importDataBackup(event) {
+      const file = event.target.files && event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = async (e) => {
+        try {
+          const parsed = JSON.parse(e.target.result);
+          const importedEmps = Array.isArray(parsed) ? parsed : (parsed.employees || []);
+          if (!Array.isArray(importedEmps)) throw new Error("数据格式不正确");
+          employees = importedEmps;
+          if (parsed.overtimeTypes && Array.isArray(parsed.overtimeTypes)) {
+            overtimeTypes = parsed.overtimeTypes;
+          }
+          persistLocalState();
+          renderDailyList();
+          renderSummary();
+          renderRosterList();
+          showToast(`✅ 成功还原 ${employees.length} 位员工档案及记录！`);
+          if (API_BASE) {
+            for (const emp of employees) {
+              await fetch(`${API_BASE}/employees`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(emp)
+              }).catch(() => {});
+            }
+          }
+        } catch (err) {
+          alert("恢复备份失败，请确认文件格式为合法的 JSON：" + err.message);
+        }
+      };
+      reader.readAsText(file);
+      event.target.value = '';
     }
 
     function clearCacheAndSyncFromCloud() {
