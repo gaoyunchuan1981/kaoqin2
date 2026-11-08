@@ -10,6 +10,8 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
 
     steps:
       - name: Checkout Source Code
@@ -36,9 +38,34 @@ jobs:
       - name: List Generated APK Files
         run: ls -la app/build/outputs/apk/debug/ || true
 
+      - name: Prepare Named Release APK
+        run: |
+          cp app/build/outputs/apk/debug/app-debug.apk app/build/outputs/apk/debug/HuaxingyuanAttendance-v1.0.0.apk || true
+
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
           name: huaxingyuan-attendance-debug-apk
           path: app/build/outputs/apk/debug/*.apk
           retention-days: 14
+
+      - name: Create or Update GitHub Release
+        if: github.ref == 'refs/heads/main'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v1.0.0
+          name: "华星园社区智能考勤 v1.0.0 (全新极光时序环品牌图标)"
+          body: |
+            ### 🌟 华星园社区 · 智能考勤 App v1.0.0
+            
+            **本次发布更新：**
+            1. 🎨 **全新品牌图标【极光时序环】**：对标 Google Workspace 与 Linear 科技大厂质感，高分辨率适配 Android 各种启动器与全套 Mipmap 密度。
+            2. ☁️ **云端生产数据库联动**：直连阿里云后端 API (`http://39.106.69.203:3000/api`)，支持员工花名册与考勤打卡数据云端实时同步。
+            3. ☀️ **明暗双模切换**：顶栏右侧新增「明 / 暗」双模开关，全套明亮配色与黑曜石深色自由切换。
+            4. 📊 **调休额度与假勤台账**：支持值班/加班工时自动累积为调休额度，精细化管理年假、病假及事假。
+            
+            **下载与安装：**
+            安卓手机直接点击下方 `HuaxingyuanAttendance-v1.0.0.apk` 下载即可安装。
+          files: |
+            app/build/outputs/apk/debug/HuaxingyuanAttendance-v1.0.0.apk
+            app/build/outputs/apk/debug/app-debug.apk
