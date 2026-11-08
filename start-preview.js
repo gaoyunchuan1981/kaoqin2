@@ -9,7 +9,7 @@ const fs = require('fs');
 const path = require('path');
 const os = require('os');
 
-const PORT = 3000;
+const PORT = process.env.PORT || parseInt(process.argv[2], 10) || 3000;
 const ASSETS_DIR = path.join(__dirname, 'app', 'src', 'main', 'assets');
 const LOCAL_DB_FILE = path.join(__dirname, 'local_test_db.json');
 
@@ -96,7 +96,7 @@ function sendJson(res, data, status = 200) {
 // ==================== HTTP 服务 ====================
 const server = http.createServer(async (req, res) => {
   const urlObj = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
-  const pathname = urlObj.pathname;
+  let pathname = urlObj.pathname;
 
   // 1. CORS 预检
   if (req.method === 'OPTIONS') {
@@ -109,7 +109,26 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
-  // 2. 本地测试 API 路由 (/api/*)
+  // 2. 根路径自动重定向至专属后缀 /kaoqin/
+  if (pathname === '/' || pathname === '') {
+    res.writeHead(302, { 'Location': '/kaoqin/' });
+    res.end();
+    return;
+  }
+
+  // /kaoqin 自动补齐结尾斜杠 /kaoqin/
+  if (pathname === '/kaoqin') {
+    res.writeHead(301, { 'Location': '/kaoqin/' });
+    res.end();
+    return;
+  }
+
+  // 剥离专属后缀 /kaoqin 前缀，使内部路由和静态文件映射无缝统一
+  if (pathname.startsWith('/kaoqin/')) {
+    pathname = pathname.slice('/kaoqin'.length); // /kaoqin/ -> /，/kaoqin/api/... -> /api/...
+  }
+
+  // 3. 本地测试 API 路由 (/api/*)
   if (pathname.startsWith('/api')) {
     loadTestDB();
 
@@ -307,10 +326,11 @@ server.listen(PORT, '0.0.0.0', () => {
   console.log('🚀 华星园社区智能考勤系统 - 本地独立测试服务已启动');
   console.log(`📁 本地测试数据库挂载: ${LOCAL_DB_FILE}`);
   console.log('------------------------------------------------------');
-  console.log(`💻 电脑测试预览:   http://localhost:${PORT}`);
+  console.log(`💻 电脑测试预览:   http://localhost:${PORT}/kaoqin/`);
   ips.forEach(ip => {
-    console.log(`📱 手机测试预览:   http://${ip.address}:${PORT} (${ip.name})`);
+    console.log(`📱 手机测试预览:   http://${ip.address}:${PORT}/kaoqin/ (${ip.name})`);
   });
-  console.log(`🎨 图标设计全景:   http://localhost:${PORT}/icons.html`);
+  console.log(`🎨 图标设计全景:   http://localhost:${PORT}/kaoqin/icons.html`);
+  console.log(`🔀 根路径自动重定向: http://localhost:${PORT}/ -> /kaoqin/`);
   console.log('======================================================\n');
 });

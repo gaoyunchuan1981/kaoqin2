@@ -1071,9 +1071,10 @@
 
     function getLocalTestApiDefault() {
       if (window.location.protocol.startsWith('http')) {
-        return `${window.location.protocol}//${window.location.host}/api`;
+        const prefix = window.location.pathname.startsWith('/kaoqin') ? '/kaoqin' : '';
+        return `${window.location.protocol}//${window.location.host}${prefix}/api`;
       }
-      return 'http://localhost:3000/api';
+      return 'http://localhost:3000/kaoqin/api';
     }
 
     // 智能环境检测：
@@ -1095,7 +1096,8 @@
 
     function getEnvApi(env) {
       const saved = localStorage.getItem(`huaxingyuan_api_${env}`);
-      if (saved) return saved;
+      // 自动将旧的不带后缀的地址平滑升级为带 /kaoqin/api 专属后缀的地址
+      if (saved && saved !== 'http://localhost:3000/api') return saved;
       return env === 'test' ? getLocalTestApiDefault() : PROD_API_DEFAULT;
     }
 
