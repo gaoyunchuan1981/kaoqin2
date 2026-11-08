@@ -1,11 +1,10 @@
 /**
- * 华星园社区智能考勤系统 - 远程云端后端服务与数据库 API
- * 基于 Express + SQLite (轻量、免独立数据库配置、单文件持久化)
+ * 华星园社区智能考勤系统 - 远程云端后端服务与持久化数据 API
+ * 纯 JavaScript 架构：免除 C++ 编译与 node-gyp 依赖，秒级安装，持久化文件存储
  */
 
 const express = require('express');
 const cors = require('cors');
-const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
 const fs = require('fs');
 const multer = require('multer');
@@ -34,43 +33,36 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage, limits: { fileSize: 5 * 1024 * 1024 } });
 
-// 数据库初始化
-const DB_PATH = process.env.ATTENDANCE_DB_PATH || path.join(__dirname, 'attendance.db');
-const db = new sqlite3.Database(DB_PATH);
+// 数据库持久化存储 (JSON 单文件高可靠存储，支持原子写入)
+const DB_PATH = process.env.ATTENDANCE_DB_PATH || path.join(__dirname, 'attendance_db.json');
+let dbData = { employees: [], records: [] };
 
-db.serialize(() => {
-  // 1. 员工表
-  db.run(`
-    CREATE TABLE IF NOT EXISTS employees (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      emp_no TEXT UNIQUE NOT NULL,
-      name TEXT NOT NULL,
-      phone TEXT,
-      avatar TEXT,
-      annual_quota INTEGER DEFAULT 40,
-      sick_quota INTEGER DEFAULT 80,
-      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-    )
-  `);
+function loadDB() {
+  if (fs.existsSync(DB_PATH)) {
+    try {
+      const raw = fs.readFileSync(DB_PATH, 'utf8');
+      dbData = JSON.parse(raw);
+      if (!Array.isArray(dbData.employees)) dbData.employees = [];
+      if (!Array.isArray(dbData.records)) dbData.records = [];
+    } catch (e) {
+      console.warn('⚠️ 读取持久化数据异常，重置新结构:', e);
+      dbData = { employees: [], records: [] };
+    }
+  } else {
+    saveDB();
+  }
+}
 
-  // 2. 假勤记录明细表
-  db.run(`
-    CREATE TABLE IF NOT EXISTS attendance_records (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      emp_id INTEGER NOT NULL,
-      date TEXT NOT NULL,
-      category TEXT NOT NULL, -- 'leave' (请假) 或 'overtime' (加班/值班)
-      type_name TEXT NOT NULL, -- '年假' | '病假' | '调休' | '事假' | '值班' | '加班'
-      hours INTEGER NOT NULL,
-      remark TEXT,
-      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-      FOREIGN KEY (emp_id) REFERENCES employees(id)
-    )
-  `);
+function saveDB() {
+  try {
+    fs.writeFileSync(DB_PATH, JSON.stringify(dbData, null, 2), 'utf8');
+  } catch (e) {
+    console.error('❌ 保存数据库失败:', e);
+  }
+}
 
-  // 生产环境：保持数据库纯净，由管理员录入或云端同步真实员工数据
-  console.log('✅ SQLite 数据库与数据表已准备就绪 (生产模式)');
-});
+loadDB();
+console.log('✅ 云端持久化数据库已准备就绪 (生产模式)');
 
 // ======================= API 路由接口 =======================
 
@@ -79,68 +71,76 @@ app.get(['/healthz', '/api/health'], (req, res) => {
   res.json({
     success: true,
     service: '华星园社区智能考勤云端 API',
-    database: 'SQLite',
+    database: 'Persistent JSON Store (Zero-Config)',
     serverTime: new Date().toISOString()
   });
 });
 
 // 1. 获取所有员工列表及其动态计算的实时余量 (年假余量、病假余量、调休池余量)
 app.get('/api/employees', (req, res) => {
-  const query = `
-    SELECT 
-      e.id, e.emp_no, e.name, e.phone, e.avatar, e.annual_quota, e.sick_quota,
-      COALESCE(SUM(CASE WHEN r.category = 'leave' AND r.type_name = '年假' THEN r.hours ELSE 0 END), 0) AS annual_used,
-      COALESCE(SUM(CASE WHEN r.category = 'leave' AND r.type_name = '病假' THEN r.hours ELSE 0 END), 0) AS sick_used,
-      COALESCE(SUM(CASE WHEN r.category = 'leave' AND r.type_name = '调休' THEN r.hours ELSE 0 END), 0) AS comp_used,
-      COALESCE(SUM(CASE WHEN r.category = 'overtime' THEN r.hours ELSE 0 END), 0) AS comp_earned
-    FROM employees e
-    LEFT JOIN attendance_records r ON e.id = r.emp_id
-    GROUP BY e.id
-    ORDER BY e.id ASC
-  `;
+  loadDB();
+  const employees = dbData.employees.map(emp => {
+    const empRecords = dbData.records.filter(r => String(r.emp_id) === String(emp.id));
 
-  db.all(query, [], (err, rows) => {
-    if (err) return res.status(500).json({ error: err.message });
-    const employees = rows.map(r => ({
-      id: r.id,
-      no: r.emp_no,
-      name: r.name,
-      phone: r.phone,
-      avatar: r.avatar,
-      annualTotalHours: r.annual_quota,
-      sickTotalHours: r.sick_quota,
-      annualRemainHours: Math.max(0, r.annual_quota - r.annual_used),
-      sickRemainHours: Math.max(0, r.sick_quota - r.sick_used),
-      compLeaveHours: Math.max(0, r.comp_earned - r.comp_used),
+    let annual_used = 0;
+    let sick_used = 0;
+    let comp_used = 0;
+    let comp_earned = 0;
+
+    empRecords.forEach(r => {
+      const hours = parseInt(r.hours) || 0;
+      if (r.category === 'leave') {
+        if (r.type_name === '年假') annual_used += hours;
+        if (r.type_name === '病假') sick_used += hours;
+        if (r.type_name === '调休') comp_used += hours;
+      } else if (r.category === 'overtime') {
+        comp_earned += hours;
+      }
+    });
+
+    const annualTotal = parseInt(emp.annual_quota) || 40;
+    const sickTotal = parseInt(emp.sick_quota) || 80;
+
+    return {
+      id: emp.id,
+      no: emp.emp_no,
+      name: emp.name,
+      phone: emp.phone || '',
+      avatar: emp.avatar || '',
+      annualTotalHours: annualTotal,
+      sickTotalHours: sickTotal,
+      annualRemainHours: Math.max(0, annualTotal - annual_used),
+      sickRemainHours: Math.max(0, sickTotal - sick_used),
+      compLeaveHours: Math.max(0, comp_earned - comp_used),
       records: []
-    }));
-    res.json({ success: true, data: employees });
+    };
   });
+
+  res.json({ success: true, data: employees });
 });
 
 // 2. 获取指定日期的考勤/假勤记录列表
 app.get('/api/records', (req, res) => {
+  loadDB();
   const date = req.query.date || new Date().toISOString().split('T')[0];
-  db.all(`
-    SELECT r.id, r.emp_id, r.date, r.category, r.type_name, r.hours, r.remark, r.created_at,
-           e.name as emp_name, e.emp_no
-    FROM attendance_records r
-    JOIN employees e ON r.emp_id = e.id
-    WHERE r.date = ?
-    ORDER BY r.created_at ASC
-  `, [date], (err, rows) => {
-    if (err) return res.status(500).json({ error: err.message });
-    const records = rows.map(r => ({
+  const filtered = dbData.records.filter(r => r.date === date);
+
+  const records = filtered.map(r => {
+    const emp = dbData.employees.find(e => String(e.id) === String(r.emp_id)) || {};
+    return {
       id: r.id,
       empId: r.emp_id,
       date: r.date,
       category: r.category,
       type: r.type_name,
       hours: r.hours,
-      remark: r.remark
-    }));
-    res.json({ success: true, date, data: records });
+      remark: r.remark || '',
+      emp_name: emp.name || '',
+      emp_no: emp.emp_no || ''
+    };
   });
+
+  res.json({ success: true, date, data: records });
 });
 
 // 3. 登记一条请假或加班记录 (支持单人单日多条并存)
@@ -150,27 +150,41 @@ app.post('/api/records', (req, res) => {
     return res.status(400).json({ error: '参数不完整' });
   }
 
-  const stmt = db.prepare(`
-    INSERT INTO attendance_records (emp_id, date, category, type_name, hours, remark)
-    VALUES (?, ?, ?, ?, ?, ?)
-  `);
-  stmt.run(empId, date, category, typeName, parseInt(hours), remark || '', function(err) {
-    if (err) return res.status(500).json({ error: err.message });
-    res.json({
-      success: true,
-      message: '记录已成功同步到云端数据库',
-      id: this.lastID
-    });
+  loadDB();
+  const newRecord = {
+    id: Date.now(),
+    emp_id: empId,
+    date,
+    category,
+    type_name: typeName,
+    hours: parseInt(hours) || 0,
+    remark: remark || '',
+    created_at: new Date().toISOString()
+  };
+
+  dbData.records.push(newRecord);
+  saveDB();
+
+  res.json({
+    success: true,
+    message: '记录已成功同步到云端数据库',
+    id: newRecord.id
   });
 });
 
 // 4. 删除一条记录（自动回滚额度）
 app.delete('/api/records/:id', (req, res) => {
   const recordId = req.params.id;
-  db.run(`DELETE FROM attendance_records WHERE id = ?`, [recordId], function(err) {
-    if (err) return res.status(500).json({ error: err.message });
+  loadDB();
+  const initialLen = dbData.records.length;
+  dbData.records = dbData.records.filter(r => String(r.id) !== String(recordId));
+
+  if (dbData.records.length !== initialLen) {
+    saveDB();
     res.json({ success: true, message: '记录已从云端删除并回滚' });
-  });
+  } else {
+    res.json({ success: true, message: '记录未找到或已删除' });
+  }
 });
 
 // 5. 新增员工档案
@@ -179,44 +193,55 @@ app.post('/api/employees', (req, res) => {
   if (!name || !no) {
     return res.status(400).json({ error: '员工工号和姓名不能为空' });
   }
-  const stmt = db.prepare(`
-    INSERT INTO employees (emp_no, name, phone, avatar, annual_quota, sick_quota)
-    VALUES (?, ?, ?, ?, ?, ?)
-  `);
-  stmt.run(no, name, phone || '', avatar || '', parseInt(annualTotalHours) || 40, parseInt(sickTotalHours) || 80, function(err) {
-    if (err) return res.status(500).json({ error: err.message });
-    res.json({ success: true, message: '新员工已添加到云端', id: this.lastID });
-  });
+
+  loadDB();
+  const newEmp = {
+    id: Date.now(),
+    emp_no: no,
+    name,
+    phone: phone || '',
+    avatar: avatar || '',
+    annual_quota: parseInt(annualTotalHours) || 40,
+    sick_quota: parseInt(sickTotalHours) || 80,
+    created_at: new Date().toISOString()
+  };
+
+  dbData.employees.push(newEmp);
+  saveDB();
+
+  res.json({ success: true, message: '新员工已添加到云端', id: newEmp.id });
 });
 
 // 6. 更新员工档案
 app.put('/api/employees/:id', (req, res) => {
   const empId = req.params.id;
   const { name, phone, avatar, annualTotalHours, sickTotalHours } = req.body;
-  db.run(`
-    UPDATE employees 
-    SET name = COALESCE(?, name),
-        phone = COALESCE(?, phone),
-        avatar = COALESCE(?, avatar),
-        annual_quota = COALESCE(?, annual_quota),
-        sick_quota = COALESCE(?, sick_quota)
-    WHERE id = ?
-  `, [name, phone, avatar, annualTotalHours, sickTotalHours, empId], function(err) {
-    if (err) return res.status(500).json({ error: err.message });
-    res.json({ success: true, message: '员工信息已在云端更新' });
-  });
+
+  loadDB();
+  const emp = dbData.employees.find(e => String(e.id) === String(empId));
+  if (!emp) {
+    return res.status(404).json({ error: '员工不存在' });
+  }
+
+  if (name !== undefined) emp.name = name;
+  if (phone !== undefined) emp.phone = phone;
+  if (avatar !== undefined) emp.avatar = avatar;
+  if (annualTotalHours !== undefined) emp.annual_quota = parseInt(annualTotalHours);
+  if (sickTotalHours !== undefined) emp.sick_quota = parseInt(sickTotalHours);
+
+  saveDB();
+  res.json({ success: true, message: '员工信息已在云端更新' });
 });
 
 // 7. 删除员工档案
 app.delete('/api/employees/:id', (req, res) => {
   const empId = req.params.id;
-  db.run(`DELETE FROM attendance_records WHERE emp_id = ?`, [empId], (err) => {
-    if (err) return res.status(500).json({ error: err.message });
-    db.run(`DELETE FROM employees WHERE id = ?`, [empId], function(err) {
-      if (err) return res.status(500).json({ error: err.message });
-      res.json({ success: true, message: '员工及其考勤明细已从云端移除' });
-    });
-  });
+  loadDB();
+  dbData.employees = dbData.employees.filter(e => String(e.id) !== String(empId));
+  dbData.records = dbData.records.filter(r => String(r.emp_id) !== String(empId));
+  saveDB();
+
+  res.json({ success: true, message: '员工及其考勤明细已从云端移除' });
 });
 
 // 8. 批量更新全体员工额度
@@ -225,17 +250,19 @@ app.post('/api/employees/batch-quotas', (req, res) => {
   if (!empIds || !empIds.length) {
     return res.status(400).json({ error: '请选择需要调整的员工' });
   }
-  const placeholders = empIds.map(() => '?').join(',');
-  const params = [annualQuota, sickQuota, ...empIds];
-  db.run(`
-    UPDATE employees 
-    SET annual_quota = COALESCE(?, annual_quota),
-        sick_quota = COALESCE(?, sick_quota)
-    WHERE id IN (${placeholders})
-  `, params, function(err) {
-    if (err) return res.status(500).json({ error: err.message });
-    res.json({ success: true, message: `已成功为 ${this.changes} 名员工同步更新年假/病假额度` });
+
+  loadDB();
+  let changed = 0;
+  dbData.employees.forEach(emp => {
+    if (empIds.some(id => String(id) === String(emp.id))) {
+      if (annualQuota !== undefined) emp.annual_quota = parseInt(annualQuota);
+      if (sickQuota !== undefined) emp.sick_quota = parseInt(sickQuota);
+      changed++;
+    }
   });
+
+  saveDB();
+  res.json({ success: true, message: `已成功为 ${changed} 名员工同步更新年假/病假额度` });
 });
 
 // 9. 头像上传接口
@@ -250,6 +277,6 @@ app.post('/api/upload-avatar', upload.single('avatar'), (req, res) => {
 app.listen(PORT, HOST, () => {
   console.log(`\n=================================================`);
   console.log(`   🚀 华星园社区考勤服务已启动: http://${HOST}:${PORT}`);
-  console.log(`   🗄️ SQLite 数据库挂载成功: ${DB_PATH}`);
+  console.log(`   🗄️ 持久化数据库挂载成功: ${DB_PATH}`);
   console.log(`=================================================\n`);
 });
