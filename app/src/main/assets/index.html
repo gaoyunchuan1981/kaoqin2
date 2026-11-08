@@ -555,6 +555,9 @@
         <button onclick="saveServerConfigAndSync()" class="w-full py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 to-indigo-600 text-white text-xs font-bold shadow-lg shadow-cyan-500/25 active:scale-98 transition">
           保存并立即拉取云端数据
         </button>
+        <button onclick="resetToMockData()" class="w-full py-2 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/20 text-rose-300 text-[11px] active:scale-98 transition">
+          重置并恢复初始4名员工演示数据
+        </button>
       </div>
     </div>
   </div>
@@ -684,6 +687,7 @@
             });
           }
           employees = Object.values(empMap);
+          persistLocalState();
           renderDailyList();
           renderSummary();
           renderRosterList();
@@ -696,7 +700,8 @@
       }
     }
 
-    let employees = [
+    // ================= 本地持久化与默认演示数据 =================
+    const defaultMockEmployees = [
       {
         id: 101,
         no: "EMP-001",
@@ -757,10 +762,57 @@
       }
     ];
 
-    let overtimeTypes = [
+    function persistLocalState() {
+      try {
+        localStorage.setItem('huaxingyuan_employees_data', JSON.stringify(employees));
+        localStorage.setItem('huaxingyuan_overtime_types', JSON.stringify(overtimeTypes));
+      } catch (e) {
+        console.warn('LocalStorage save failed:', e);
+      }
+    }
+
+    function resetToMockData() {
+      if (confirm('确认要清除所有本地修改，恢复到初始的4名员工演示数据吗？')) {
+        localStorage.removeItem('huaxingyuan_employees_data');
+        localStorage.removeItem('huaxingyuan_overtime_types');
+        employees = JSON.parse(JSON.stringify(defaultMockEmployees));
+        overtimeTypes = JSON.parse(JSON.stringify(defaultOvertimeTypes));
+        persistLocalState();
+        renderDailyList();
+        renderSummary();
+        renderRosterList();
+        showToast('已重置恢复至初始演示数据！');
+      }
+    }
+
+    let employees = [];
+    const savedEmployees = localStorage.getItem('huaxingyuan_employees_data');
+    if (savedEmployees) {
+      try {
+        employees = JSON.parse(savedEmployees);
+      } catch (e) {
+        employees = JSON.parse(JSON.stringify(defaultMockEmployees));
+      }
+    } else {
+      employees = JSON.parse(JSON.stringify(defaultMockEmployees));
+      persistLocalState();
+    }
+
+    const defaultOvertimeTypes = [
       { id: "ot_duty", name: "值班", desc: "周末/假期轮岗值守", isSystem: true },
       { id: "ot_work", name: "加班", desc: "日常任务或紧急项目加点", isSystem: true }
     ];
+    let overtimeTypes = [];
+    const savedOtTypes = localStorage.getItem('huaxingyuan_overtime_types');
+    if (savedOtTypes) {
+      try {
+        overtimeTypes = JSON.parse(savedOtTypes);
+      } catch (e) {
+        overtimeTypes = JSON.parse(JSON.stringify(defaultOvertimeTypes));
+      }
+    } else {
+      overtimeTypes = JSON.parse(JSON.stringify(defaultOvertimeTypes));
+    }
 
     let activeEmpId = null;
     let selectedLeaveType = "年假";
@@ -1002,6 +1054,7 @@
       }
 
       closeEmployeeModal();
+      persistLocalState();
       renderRosterList();
       renderDailyList();
       renderSummary();
@@ -1012,6 +1065,7 @@
       const emp = employees.find(e => e.id === editingEmpId);
       if (confirm(`确认要删除员工【${emp.name}】吗？`)) {
         employees = employees.filter(e => e.id !== editingEmpId);
+        persistLocalState();
         closeEmployeeModal();
         renderRosterList();
         renderDailyList();
@@ -1071,6 +1125,7 @@
       });
 
       closeBatchModal();
+      persistLocalState();
       renderRosterList();
       renderDailyList();
       renderSummary();
@@ -1228,6 +1283,7 @@
       });
 
       closeLeaveModal();
+      persistLocalState();
       renderDailyList();
       renderSummary();
       showToast(`已为【${emp.name}】新增一条请假记录 (${selectedLeaveType} ${selectedLeaveHours}h)`);
@@ -1268,7 +1324,7 @@
       }
 
       emp.records = emp.records.filter(r => r.id !== recId);
-
+      persistLocalState();
       renderDailyList();
       renderSummary();
       showToast(`已删除【${emp.name}】的 ${rec.type} ${rec.hours}h 记录，额度已回滚！`);
@@ -1344,6 +1400,7 @@
       });
 
       closeOtModal();
+      persistLocalState();
       renderDailyList();
       renderSummary();
       showToast(`已为【${emp.name}】新增一条记录 (${selectedOtType} +${selectedOtHours}h 调休)`);
@@ -1404,12 +1461,14 @@
         isSystem: false
       });
       document.getElementById('new-ot-type-input').value = '';
+      persistLocalState();
       renderOtTypesList();
       showToast(`已新增加班类型: ${val}`);
     }
 
     function deleteOtType(id) {
       overtimeTypes = overtimeTypes.filter(t => t.id !== id);
+      persistLocalState();
       renderOtTypesList();
       showToast("已删除该加班类型");
     }
