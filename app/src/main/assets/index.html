@@ -9,6 +9,19 @@
   <link rel="manifest" href="manifest.json">
   <title>华星园社区 - 智能考勤</title>
   <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+  <script>
+    // 立即执行以避免明亮模式加载白屏/闪烁 (默认“明”，可切换“暗”)
+    (function() {
+      try {
+        const saved = localStorage.getItem('app-theme');
+        if (saved === 'dark') {
+          document.documentElement.classList.remove('theme-light');
+        } else {
+          document.documentElement.classList.add('theme-light');
+        }
+      } catch(e) {}
+    })();
+  </script>
   <style>
     .no-scrollbar::-webkit-scrollbar { display: none; }
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
@@ -27,9 +40,266 @@
     .neon-pill-cyan {
       box-shadow: 0 0 12px rgba(6, 182, 212, 0.25);
     }
+
+    /* =================== 明亮模式 (Light Theme) =================== */
+    body.theme-light {
+      background-color: #F1F4F9 !important;
+      color: #0F172A !important;
+    }
+
+    body.theme-light header {
+      background: rgba(255, 255, 255, 0.90) !important;
+      border-bottom: 1px solid rgba(226, 232, 240, 0.95) !important;
+      box-shadow: 0 1px 4px 0 rgba(15, 23, 42, 0.04);
+    }
+
+    body.theme-light #header-title {
+      background: linear-gradient(135deg, #0F172A 0%, #312E81 100%) !important;
+      -webkit-background-clip: text !important;
+      -webkit-text-fill-color: transparent !important;
+    }
+
+    body.theme-light #header-subtitle {
+      color: #64748B !important;
+    }
+
+    body.theme-light .ai-aurora-glow {
+      background: radial-gradient(circle at 50% 0%, rgba(99, 102, 241, 0.12) 0%, rgba(14, 165, 233, 0.08) 40%, transparent 75%) !important;
+    }
+
+    body.theme-light .glass-card {
+      background: rgba(255, 255, 255, 0.92) !important;
+      border: 1px solid rgba(226, 232, 240, 0.95) !important;
+      box-shadow: 0 4px 16px -2px rgba(15, 23, 42, 0.05), 0 2px 4px -1px rgba(15, 23, 42, 0.03) !important;
+    }
+
+    body.theme-light nav {
+      background: rgba(255, 255, 255, 0.95) !important;
+      border-top: 1px solid rgba(226, 232, 240, 0.95) !important;
+      box-shadow: 0 -4px 16px rgba(15, 23, 42, 0.04) !important;
+    }
+
+    body.theme-light nav button[class*="text-cyan-400"] {
+      color: #0284c7 !important;
+    }
+    body.theme-light nav button:not([class*="text-cyan-400"]) {
+      color: #94a3b8 !important;
+    }
+
+    /* 抽屉弹窗全局明亮化 */
+    body.theme-light div[id^="modal-"] > div {
+      background: rgba(255, 255, 255, 0.98) !important;
+      border-top: 1px solid rgba(226, 232, 240, 0.95) !important;
+      color: #0F172A !important;
+      box-shadow: 0 -10px 30px -5px rgba(15, 23, 42, 0.12) !important;
+    }
+    body.theme-light div[id^="modal-"] {
+      background-color: rgba(15, 23, 42, 0.45) !important;
+    }
+    body.theme-light div[id^="modal-"] h3 {
+      color: #0F172A !important;
+    }
+    body.theme-light div[id^="modal-"] button[onclick*="close"],
+    body.theme-light div[id^="modal-"] button[class*="rounded-full"][class*="text-slate-300"] {
+      background-color: #F1F5F9 !important;
+      color: #64748B !important;
+    }
+
+    /* 文字智能映射 */
+    body.theme-light .glass-card .text-white,
+    body.theme-light div[id^="modal-"] .text-white {
+      color: #0F172A !important;
+    }
+    body.theme-light .glass-card .text-slate-100,
+    body.theme-light div[id^="modal-"] .text-slate-100 {
+      color: #1E293B !important;
+    }
+    body.theme-light .glass-card .text-slate-200,
+    body.theme-light div[id^="modal-"] .text-slate-200 {
+      color: #334155 !important;
+    }
+    body.theme-light .glass-card .text-slate-300,
+    body.theme-light div[id^="modal-"] .text-slate-300 {
+      color: #475569 !important;
+    }
+    body.theme-light .glass-card .text-slate-400,
+    body.theme-light div[id^="modal-"] .text-slate-400 {
+      color: #64748B !important;
+    }
+    body.theme-light .glass-card .text-slate-500,
+    body.theme-light div[id^="modal-"] .text-slate-500 {
+      color: #94A3B8 !important;
+    }
+
+    /* 渐变与主操作按钮保持高对比度白字 */
+    body.theme-light button[class*="from-blue-600"],
+    body.theme-light button[class*="from-cyan-500"],
+    body.theme-light button[class*="from-emerald-500"],
+    body.theme-light div[class*="from-cyan-500"][class*="to-indigo-600"],
+    body.theme-light .keep-white {
+      color: #FFFFFF !important;
+    }
+    body.theme-light div[class*="from-cyan-500"][class*="to-indigo-600"] span {
+      color: #FFFFFF !important;
+    }
+
+    /* 输入框/下拉框明亮风格 */
+    body.theme-light input,
+    body.theme-light select,
+    body.theme-light textarea {
+      background-color: #F8FAFC !important;
+      border-color: #CBD5E1 !important;
+      color: #0F172A !important;
+    }
+    body.theme-light input:focus,
+    body.theme-light select:focus,
+    body.theme-light textarea:focus {
+      background-color: #FFFFFF !important;
+      border-color: #6366F1 !important;
+    }
+
+    /* 内嵌容器与胶囊卡片 */
+    body.theme-light .bg-slate-900,
+    body.theme-light .bg-\[\#131D36\] {
+      background-color: #F8FAFC !important;
+      border-color: #E2E8F0 !important;
+    }
+    body.theme-light .bg-white\/\[0\.03\],
+    body.theme-light .bg-white\/\[0\.04\],
+    body.theme-light .bg-white\/\[0\.05\],
+    body.theme-light .bg-white\/\[0\.06\],
+    body.theme-light .bg-white\/\[0\.08\] {
+      background-color: #F1F5F9 !important;
+      border-color: #E2E8F0 !important;
+      color: #475569 !important;
+    }
+
+    /* 徽章与标签色彩明朗化 */
+    body.theme-light .bg-emerald-500\/10 {
+      background-color: rgba(16, 185, 129, 0.1) !important;
+      border-color: rgba(16, 185, 129, 0.3) !important;
+      color: #047857 !important;
+    }
+    body.theme-light .bg-rose-500\/10 {
+      background-color: rgba(244, 63, 94, 0.1) !important;
+      border-color: rgba(244, 63, 94, 0.3) !important;
+      color: #be123c !important;
+    }
+    body.theme-light .bg-purple-500\/10 {
+      background-color: rgba(168, 85, 247, 0.1) !important;
+      border-color: rgba(168, 85, 247, 0.3) !important;
+      color: #6b21a8 !important;
+    }
+    body.theme-light .bg-purple-500\/15 {
+      background-color: rgba(168, 85, 247, 0.12) !important;
+      border-color: rgba(168, 85, 247, 0.35) !important;
+      color: #6b21a8 !important;
+    }
+    body.theme-light .text-purple-400 {
+      color: #7e22ce !important;
+    }
+    body.theme-light .text-emerald-400 {
+      color: #059669 !important;
+    }
+    body.theme-light .text-rose-400 {
+      color: #e11d48 !important;
+    }
+    body.theme-light .text-cyan-400 {
+      color: #0284c7 !important;
+    }
+    body.theme-light .text-indigo-300 {
+      color: #4f46e5 !important;
+    }
+    body.theme-light .text-amber-400 {
+      color: #d97706 !important;
+    }
+    body.theme-light .text-amber-300 {
+      color: #b45309 !important;
+    }
+
+    /* 考勤横幅与卡片内子容器 */
+    body.theme-light .bg-indigo-950\/40 {
+      background-color: rgba(238, 242, 255, 0.95) !important;
+      border-color: rgba(199, 210, 254, 0.8) !important;
+      color: #3730A3 !important;
+    }
+    body.theme-light .bg-indigo-950\/20 {
+      background-color: rgba(238, 242, 255, 0.7) !important;
+      border-color: rgba(199, 210, 254, 0.7) !important;
+      color: #3730A3 !important;
+    }
+    body.theme-light .bg-emerald-950\/30 {
+      background-color: rgba(236, 253, 245, 0.85) !important;
+      border-color: rgba(167, 243, 208, 0.85) !important;
+    }
+    body.theme-light .bg-rose-950\/30 {
+      background-color: rgba(255, 241, 242, 0.85) !important;
+      border-color: rgba(254, 205, 211, 0.85) !important;
+    }
+    body.theme-light .bg-purple-950\/30 {
+      background-color: rgba(250, 245, 255, 0.85) !important;
+      border-color: rgba(233, 213, 255, 0.85) !important;
+    }
+    body.theme-light .bg-amber-950\/20 {
+      background-color: rgba(254, 243, 199, 0.85) !important;
+      border-color: rgba(252, 211, 77, 0.8) !important;
+      color: #92400e !important;
+    }
+    body.theme-light .bg-purple-950\/20 {
+      background-color: rgba(243, 232, 255, 0.85) !important;
+      border-color: rgba(216, 180, 254, 0.8) !important;
+      color: #6b21a8 !important;
+    }
+
+    /* 登记考勤操作按钮 */
+    body.theme-light button[onclick*="openLeaveModal"] {
+      background-color: rgba(245, 158, 11, 0.12) !important;
+      border-color: rgba(245, 158, 11, 0.35) !important;
+      color: #b45309 !important;
+      font-weight: 600;
+    }
+    body.theme-light button[onclick*="openOtModal"] {
+      background-color: rgba(147, 51, 234, 0.1) !important;
+      border-color: rgba(147, 51, 234, 0.3) !important;
+      color: #7e22ce !important;
+      font-weight: 600;
+    }
+
+    /* 日期切换控件 */
+    body.theme-light #cur-date-display {
+      color: #0F172A !important;
+    }
+    body.theme-light #today-badge {
+      background: rgba(6, 182, 212, 0.12) !important;
+      border-color: rgba(6, 182, 212, 0.3) !important;
+      color: #0891b2 !important;
+    }
+    body.theme-light #btn-prev-date {
+      color: #475569 !important;
+    }
+    body.theme-light #btn-prev-date:hover {
+      background-color: #F1F5F9 !important;
+      color: #0F172A !important;
+    }
+
+    /* 日历抽屉日期格子明亮化 */
+    body.theme-light #modal-calendar .text-slate-200 {
+      color: #334155 !important;
+    }
+    body.theme-light #modal-calendar .text-slate-400 {
+      color: #64748B !important;
+    }
+    body.theme-light #modal-calendar .hover\:bg-white\/\[0\.08\]:hover {
+      background-color: #F1F5F9 !important;
+    }
+    body.theme-light #modal-calendar .border-cyan-400\/60 {
+      border-color: #0284c7 !important;
+      background-color: #e0f2fe !important;
+      color: #0369a1 !important;
+    }
   </style>
 </head>
-<body class="bg-[#090D18] text-slate-100 antialiased min-h-screen flex flex-col relative selection:bg-indigo-500 selection:text-white pb-20">
+<body class="theme-light bg-[#090D18] text-slate-100 antialiased min-h-screen flex flex-col relative selection:bg-indigo-500 selection:text-white pb-20">
 
   <!-- 顶部状态与安全区 -->
   <header class="relative px-4 py-3.5 select-none z-20 border-b border-white/[0.08] bg-[#0E1526]/90 backdrop-blur-xl sticky top-0">
@@ -40,17 +310,21 @@
           <svg class="w-4 h-4 text-cyan-400 shrink-0" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L14.4 7.6L20 10L14.4 12.4L12 18L9.6 12.4L4 10L9.6 7.6L12 2Z"/></svg>
           <span id="header-title" class="bg-gradient-to-r from-white via-slate-100 to-indigo-200 bg-clip-text text-transparent font-black tracking-tight text-base">华星园社区</span>
         </div>
-        <p class="text-[11px] text-slate-400 mt-0.5" id="header-subtitle">AI 智能考勤 · 假勤多维感知 (共4人)</p>
+        <p class="text-[11px] text-slate-400 mt-0.5" id="header-subtitle">AI 智能考勤 · 假勤多维感知</p>
       </div>
-      <div class="flex items-center gap-1.5">
-        <button onclick="openServerConfigModal()" id="cloud-status-btn" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-800/80 border border-white/10 text-slate-300 text-[10px] font-medium backdrop-blur-md active:scale-95 transition">
-          <span id="cloud-status-dot" class="w-1.5 h-1.5 rounded-full bg-amber-400"></span>
-          <span id="cloud-status-text">连接云端</span>
-        </button>
-        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-indigo-500/15 border border-indigo-400/30 text-indigo-300 text-[10px] font-medium backdrop-blur-md neon-pill-cyan">
-          <span class="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse"></span>
-          默认全勤
-        </span>
+
+      <!-- 明暗主题切换开关 (默认“明”，可切换“暗”) -->
+      <div class="flex items-center">
+        <div id="theme-segmented-switch" class="inline-flex items-center p-0.5 rounded-full border border-slate-300/80 bg-slate-200/80 backdrop-blur-md shadow-xs select-none transition-all cursor-pointer" onclick="toggleTheme()" title="点击切换明/暗模式">
+          <div id="pill-opt-light" onclick="event.stopPropagation(); toggleTheme('light')" class="flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold transition-all shadow-xs bg-white text-indigo-700">
+            <span class="text-xs">☀️</span>
+            <span>明</span>
+          </div>
+          <div id="pill-opt-dark" onclick="event.stopPropagation(); toggleTheme('dark')" class="flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium transition-all text-slate-500 hover:text-slate-800">
+            <span class="text-xs">🌙</span>
+            <span>暗</span>
+          </div>
+        </div>
       </div>
     </div>
   </header>
@@ -64,16 +338,22 @@
     <!-- ================= 页面 1: 每日记考勤 ================= -->
     <section id="tab-daily" class="space-y-3 relative z-10">
       
-      <!-- 日期胶囊卡片 -->
-      <div class="glass-card rounded-2xl p-2.5 flex items-center justify-between text-xs shadow-lg">
-        <button onclick="switchDate(-1)" class="p-1 hover:bg-white/[0.06] rounded-xl text-slate-400 hover:text-slate-200 active:scale-90 transition">
+      <!-- 日期范围选择与快速切换胶囊卡片 -->
+      <div class="glass-card rounded-2xl p-2 flex items-center justify-between text-xs shadow-lg relative">
+        <button id="btn-prev-date" onclick="switchDate(-1)" title="前一天" class="p-2 hover:bg-white/[0.08] rounded-xl text-slate-300 hover:text-white active:scale-90 transition z-20 flex items-center justify-center">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
         </button>
-        <div class="text-center">
-          <span class="font-bold text-white text-sm tracking-wide" id="cur-date-display">2026年11月07日</span>
-          <span class="ml-1.5 text-[10px] bg-gradient-to-r from-cyan-500/20 to-blue-500/20 border border-cyan-500/30 text-cyan-300 px-2 py-0.5 rounded-full font-semibold shadow-xs" id="today-badge">今天</span>
+
+        <div class="flex-1 flex items-center justify-center cursor-pointer group py-1 active:scale-98 transition" onclick="openCalendarModal()" title="点击打开考勤日历">
+          <div class="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-white/[0.04] group-hover:bg-white/[0.08] border border-white/[0.06] group-hover:border-cyan-500/30 transition shadow-xs">
+            <svg class="w-4 h-4 text-cyan-400 group-hover:scale-110 transition shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+            <span class="font-bold text-white text-sm tracking-wide" id="cur-date-display">2026年11月08日</span>
+            <span class="text-[10px] bg-gradient-to-r from-cyan-500/20 to-blue-500/20 border border-cyan-500/30 text-cyan-300 px-2 py-0.5 rounded-full font-semibold shadow-xs" id="today-badge">今天</span>
+            <svg class="w-3.5 h-3.5 text-slate-400 group-hover:text-cyan-300 transition shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
+          </div>
         </div>
-        <button onclick="switchDate(1)" class="p-1 hover:bg-white/[0.06] rounded-xl text-slate-400 hover:text-slate-200 active:scale-90 transition">
+
+        <button id="btn-next-date" onclick="switchDate(1)" title="后一天（未来日期不可切换）" class="p-2 rounded-xl text-slate-600 opacity-30 cursor-not-allowed transition z-20 flex items-center justify-center pointer-events-none" disabled>
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
         </button>
       </div>
@@ -103,7 +383,7 @@
     <section id="tab-summary" class="space-y-3 relative z-10 hidden">
       <div class="glass-card rounded-2xl p-2.5 flex items-center justify-between text-xs">
         <span class="font-bold text-white text-sm">2026年11月 假期与工时总览</span>
-        <button onclick="exportExcelReport()" class="px-2.5 py-1 bg-gradient-to-r from-emerald-600 to-teal-600 text-white rounded-xl text-xs font-medium hover:opacity-90 active:scale-95 transition flex items-center gap-1 shadow-md shadow-emerald-500/20">
+        <button onclick="openExportModal()" class="px-2.5 py-1.5 bg-gradient-to-r from-emerald-600 to-teal-600 text-white rounded-xl text-xs font-semibold hover:opacity-90 active:scale-95 transition flex items-center gap-1.5 shadow-md shadow-emerald-500/20">
           <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
           导出对账表
         </button>
@@ -160,6 +440,10 @@
           <p class="text-[10px] text-slate-400">支持单独编辑及批量设假</p>
         </div>
         <div class="flex items-center gap-2">
+          <button onclick="openServerConfigModal()" title="云端 SQLite 数据库设置" class="px-2.5 py-1.5 bg-white/[0.06] border border-white/10 text-cyan-300 rounded-xl text-xs font-semibold hover:bg-white/[0.1] active:scale-95 transition flex items-center gap-1 shadow-sm">
+            <svg class="w-3.5 h-3.5 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 00-9.78 2.096A4.001 4.001 0 003 15z"/></svg>
+            云端配置
+          </button>
           <button onclick="openBatchSettingModal()" class="px-2.5 py-1.5 bg-indigo-500/15 border border-indigo-500/30 text-indigo-300 rounded-xl text-xs font-semibold hover:bg-indigo-500/25 active:scale-95 transition flex items-center gap-1 shadow-sm">
             <svg class="w-3.5 h-3.5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/></svg>
             批量设假
@@ -204,7 +488,172 @@
     </button>
   </nav>
 
-  <!-- 弹窗 1: 单独编辑 / 录入员工档案 -->
+  <!-- 弹窗 0: 移动端专属高颜值暗黑玻璃态日历抽屉 (选择考勤日期) -->
+  <div id="modal-calendar" class="fixed inset-0 bg-black/70 backdrop-blur-md z-50 flex flex-col justify-end transition-opacity duration-200 hidden" onclick="if(event.target === this) closeCalendarModal()">
+    <div class="bg-[#0F172A]/98 border-t border-white/[0.12] rounded-t-3xl p-4 sm:p-5 space-y-3.5 shadow-2xl text-white max-w-md mx-auto w-full select-none">
+      
+      <!-- 抽屉顶部指示条与标题栏 -->
+      <div class="flex flex-col items-center">
+        <div class="w-10 h-1 bg-white/20 rounded-full mb-3"></div>
+        <div class="w-full flex items-center justify-between border-b border-white/[0.08] pb-2.5">
+          <div class="flex items-center gap-2">
+            <div class="w-7 h-7 rounded-xl bg-cyan-500/15 border border-cyan-500/30 flex items-center justify-center text-cyan-400 shadow-sm">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+            </div>
+            <div>
+              <h3 class="font-bold text-sm text-white">选择考勤日期</h3>
+              <p class="text-[10px] text-slate-400">切换考勤日期，自动同步相应假勤明细</p>
+            </div>
+          </div>
+          <button onclick="closeCalendarModal()" class="w-7 h-7 bg-white/[0.08] hover:bg-white/[0.15] rounded-full flex items-center justify-center text-slate-300 font-bold transition">✕</button>
+        </div>
+      </div>
+
+      <!-- 快速直达快捷胶囊 (今天 / 昨天 / 前天) -->
+      <div class="flex items-center gap-2 text-xs" id="cal-quick-pills"></div>
+
+      <!-- 年月份导航切换栏 -->
+      <div class="flex items-center justify-between bg-white/[0.03] px-3 py-2 rounded-2xl border border-white/[0.06]">
+        <button onclick="changeCalendarMonth(-1)" title="上个月" class="p-1.5 hover:bg-white/[0.08] active:scale-90 rounded-xl text-slate-300 hover:text-white transition flex items-center justify-center">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+        </button>
+        
+        <div class="flex items-center gap-2">
+          <span class="font-bold text-white text-sm tracking-wide" id="cal-month-title">2026年 11月</span>
+          <button onclick="jumpToCurrentMonth()" class="text-[10px] bg-cyan-500/15 border border-cyan-500/30 text-cyan-300 px-2 py-0.5 rounded-full font-medium hidden" id="cal-back-current-month-btn">返回本月</button>
+        </div>
+
+        <button id="cal-next-month-btn" onclick="changeCalendarMonth(1)" title="下个月" class="p-1.5 hover:bg-white/[0.08] active:scale-90 rounded-xl text-slate-300 hover:text-white transition flex items-center justify-center">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+        </button>
+      </div>
+
+      <!-- 星期表头 -->
+      <div class="grid grid-cols-7 gap-1 text-center text-[11px] font-semibold text-slate-400">
+        <div>一</div>
+        <div>二</div>
+        <div>三</div>
+        <div>四</div>
+        <div>五</div>
+        <div class="text-cyan-400/90">六</div>
+        <div class="text-cyan-400/90">日</div>
+      </div>
+
+      <!-- 动态日历天数网格 -->
+      <div class="grid grid-cols-7 gap-1 text-center text-xs" id="cal-days-grid"></div>
+
+      <!-- 图例与操作说明 -->
+      <div class="flex items-center justify-between text-[10px] text-slate-400 pt-2 border-t border-white/[0.06] px-1">
+        <div class="flex items-center gap-3">
+          <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-cyan-400 shadow-[0_0_6px_rgba(6,182,212,0.8)]"></span>当前选中</span>
+          <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-amber-400 shadow-[0_0_6px_rgba(251,191,36,0.8)]"></span>有假勤记录</span>
+          <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full border border-cyan-400/60 bg-cyan-500/20"></span>今日</span>
+        </div>
+        <span class="text-slate-500">未来日期不可选</span>
+      </div>
+
+    </div>
+  </div>
+
+    <!-- 弹窗 5: 导出统计表与对账单抽屉 (支持按月份与自定义范围) -->
+  <div id="modal-export" class="fixed inset-0 bg-black/70 backdrop-blur-md z-50 flex flex-col justify-end transition-opacity duration-200 hidden" onclick="if(event.target === this) closeExportModal()">
+    <div class="bg-[#0F172A]/98 border-t border-white/[0.12] rounded-t-3xl p-4 sm:p-5 space-y-4 shadow-2xl text-white max-w-md mx-auto w-full select-none max-h-[92%] overflow-y-auto">
+      
+      <!-- 抽屉顶部指示条与标题 -->
+      <div class="flex flex-col items-center">
+        <div class="w-10 h-1 bg-white/20 rounded-full mb-3"></div>
+        <div class="w-full flex items-center justify-between border-b border-white/[0.08] pb-2.5">
+          <div class="flex items-center gap-2">
+            <div class="w-8 h-8 rounded-xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-400 shadow-sm">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+            </div>
+            <div>
+              <h3 class="font-bold text-sm text-white">导出考勤与假期统计表</h3>
+              <p class="text-[10px] text-slate-400">生成含全员汇总与逐日明细的双工作表 Excel 报表</p>
+            </div>
+          </div>
+          <button onclick="closeExportModal()" class="w-7 h-7 bg-white/[0.08] hover:bg-white/[0.15] rounded-full flex items-center justify-center text-slate-300 font-bold transition">✕</button>
+        </div>
+      </div>
+
+      <!-- 时间模式切换 Tab (按月份 / 按日期范围) -->
+      <div class="grid grid-cols-2 gap-1.5 p-1 bg-white/[0.04] rounded-xl border border-white/[0.08] text-xs">
+        <button id="tab-btn-export-month" onclick="switchExportMode('month')" class="py-1.5 rounded-lg font-bold text-center transition bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+          按自然月份导出
+        </button>
+        <button id="tab-btn-export-range" onclick="switchExportMode('range')" class="py-1.5 rounded-lg font-medium text-slate-400 text-center transition hover:text-white">
+          按自定义日期范围
+        </button>
+      </div>
+
+      <!-- 模式 1: 按月份选择 -->
+      <div id="export-mode-month" class="space-y-2.5">
+        <label class="block text-xs font-semibold text-slate-300">选择需要统计的月份</label>
+        <div class="grid grid-cols-3 gap-2" id="export-month-pills"></div>
+      </div>
+
+      <!-- 模式 2: 自定义日期范围 -->
+      <div id="export-mode-range" class="space-y-3 hidden">
+        <div class="flex items-center justify-between">
+          <label class="text-xs font-semibold text-slate-300">选择自定义起止时间</label>
+          <span class="text-[10px] text-cyan-400">支持跨月/跨周统计</span>
+        </div>
+
+        <!-- 快捷范围按钮 -->
+        <div class="grid grid-cols-4 gap-1.5 text-[11px]" id="export-range-shortcuts">
+          <button onclick="setExportRangeShortcut('month-to-date')" class="py-1.5 rounded-lg bg-white/[0.04] border border-white/[0.08] hover:bg-white/[0.08] text-slate-300 text-center transition active:scale-95">本月至今</button>
+          <button onclick="setExportRangeShortcut('last-7-days')" class="py-1.5 rounded-lg bg-white/[0.04] border border-white/[0.08] hover:bg-white/[0.08] text-slate-300 text-center transition active:scale-95">近7天</button>
+          <button onclick="setExportRangeShortcut('last-30-days')" class="py-1.5 rounded-lg bg-white/[0.04] border border-white/[0.08] hover:bg-white/[0.08] text-slate-300 text-center transition active:scale-95">近30天</button>
+          <button onclick="setExportRangeShortcut('last-month')" class="py-1.5 rounded-lg bg-white/[0.04] border border-white/[0.08] hover:bg-white/[0.08] text-slate-300 text-center transition active:scale-95">上个月整月</button>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2 text-xs">
+          <div>
+            <label class="block text-[11px] text-slate-400 mb-1">起始日期</label>
+            <input type="date" id="export-start-date" class="w-full bg-slate-900 border border-white/[0.12] rounded-xl px-2.5 py-2 text-white text-xs focus:outline-none focus:border-emerald-500" onchange="onExportDateChange()" />
+          </div>
+          <div>
+            <label class="block text-[11px] text-slate-400 mb-1">截止日期</label>
+            <input type="date" id="export-end-date" class="w-full bg-slate-900 border border-white/[0.12] rounded-xl px-2.5 py-2 text-white text-xs focus:outline-none focus:border-emerald-500" onchange="onExportDateChange()" />
+          </div>
+        </div>
+      </div>
+
+      <!-- 导出内容信息卡片 -->
+      <div class="bg-white/[0.03] border border-white/[0.08] rounded-2xl p-3 space-y-2 text-xs">
+        <div class="flex items-center justify-between">
+          <span class="text-slate-400">统计有效周期:</span>
+          <span class="font-bold text-white font-mono" id="export-preview-range">2026-11-01 至 2026-11-08 (共 8 天)</span>
+        </div>
+        <div class="flex items-center justify-between">
+          <span class="text-slate-400">涵盖员工档案:</span>
+          <span class="font-bold text-emerald-400" id="export-preview-emps">全体员工 (共 4 人)</span>
+        </div>
+        <div class="flex items-center justify-between">
+          <span class="text-slate-400">期间假勤记录:</span>
+          <span class="font-bold text-amber-300" id="export-preview-records">共 4 条记录</span>
+        </div>
+        <div class="border-t border-white/[0.06] pt-2 flex items-center gap-2 text-[10px] text-slate-400">
+          <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0"></span>
+          <span>导出的 Excel 文件内建两张独立工作表：【全员假勤汇总表】与【逐日假勤明细流水】</span>
+        </div>
+      </div>
+
+      <!-- 操作按钮 -->
+      <div class="grid grid-cols-2 gap-2 pt-1">
+        <button onclick="closeExportModal()" class="py-2.5 rounded-xl border border-white/[0.1] bg-white/[0.04] hover:bg-white/[0.08] text-slate-300 font-semibold text-xs transition active:scale-95">
+          取消
+        </button>
+        <button onclick="executeExcelExport()" class="py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:opacity-95 text-white font-bold text-xs shadow-lg shadow-emerald-500/25 transition active:scale-95 flex items-center justify-center gap-1.5">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+          立即导出 Excel (.xls)
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+    <!-- 弹窗 1: 单独编辑 / 录入员工档案 -->
   <div id="modal-employee" class="fixed inset-0 bg-black/60 backdrop-blur-md z-40 flex flex-col justify-end transition-opacity duration-200 hidden">
     <div class="bg-[#0F172A]/95 border-t border-white/[0.12] rounded-t-3xl p-4 space-y-3.5 max-h-[92%] overflow-y-auto shadow-2xl text-white">
       <div class="flex items-center justify-between border-b border-white/[0.08] pb-2">
@@ -222,14 +671,17 @@
         <div class="space-y-1">
           <div class="text-xs font-semibold text-white">员工照片 (支持更换)</div>
           <div class="flex items-center gap-2">
-            <button onclick="triggerPhoto('camera')" class="px-2 py-1 bg-white/[0.06] border border-white/[0.12] hover:bg-white/[0.12] text-[11px] rounded-lg font-medium text-slate-200 flex items-center gap-1">
-              <svg class="w-3 h-3 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+            <button type="button" onclick="triggerPhoto('camera')" class="px-2.5 py-1.5 bg-white/[0.06] border border-white/[0.12] hover:bg-white/[0.12] text-[11px] rounded-lg font-medium text-slate-200 flex items-center gap-1 active:scale-95 transition">
+              <svg class="w-3.5 h-3.5 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
               现场拍照
             </button>
-            <button onclick="triggerPhoto('upload')" class="px-2 py-1 bg-white/[0.06] border border-white/[0.12] hover:bg-white/[0.12] text-[11px] rounded-lg font-medium text-slate-200 flex items-center gap-1">
-              <svg class="w-3 h-3 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+            <button type="button" onclick="triggerPhoto('upload')" class="px-2.5 py-1.5 bg-white/[0.06] border border-white/[0.12] hover:bg-white/[0.12] text-[11px] rounded-lg font-medium text-slate-200 flex items-center gap-1 active:scale-95 transition">
+              <svg class="w-3.5 h-3.5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
               本地相册
             </button>
+            <!-- 隐藏的真实相机与相册上传 input -->
+            <input type="file" id="inp-photo-camera" accept="image/*" capture="user" class="hidden" onchange="handlePhotoFileSelected(this)" />
+            <input type="file" id="inp-photo-gallery" accept="image/*" class="hidden" onchange="handlePhotoFileSelected(this)" />
           </div>
         </div>
       </div>
@@ -293,6 +745,20 @@
               <input type="number" id="inp-sick-remain" value="80" min="0" step="4" class="w-16 bg-slate-900 border border-rose-500/40 rounded-lg px-2 py-1 text-xs text-center font-bold text-rose-400">
               <span class="text-xs text-slate-400">小时</span>
             </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-purple-950/30 border border-purple-500/30 rounded-2xl p-2.5 space-y-1.5">
+        <div class="flex justify-between items-center text-xs">
+          <span class="font-bold text-purple-300">调休额度单独设置</span>
+          <span class="text-[10px] text-purple-400">加班累积 / 请假抵扣</span>
+        </div>
+        <div class="flex items-center justify-between text-xs">
+          <span class="text-[11px] text-slate-400">当前剩余可用调休:</span>
+          <div class="flex items-center gap-1">
+            <input type="number" id="inp-comp-hours" value="0" min="0" step="1" class="w-20 bg-slate-900 border border-purple-500/40 rounded-lg px-2 py-1 text-xs text-center font-bold text-purple-400">
+            <span class="text-xs text-slate-400">小时</span>
           </div>
         </div>
       </div>
@@ -453,7 +919,7 @@
       <div class="flex items-center justify-between border-b border-white/[0.08] pb-2">
         <div>
           <h3 class="font-bold text-sm text-white">登记加班/值班 - <span id="ot-modal-empname">张健</span></h3>
-          <p class="text-[10px] text-purple-400">工时 1:1 计入员工调休池</p>
+          <p class="text-[10px] text-purple-400" id="ot-modal-subtitle">工时 1:1 计入员工调休池</p>
         </div>
         <button onclick="closeOtModal()" class="w-7 h-7 bg-white/[0.08] hover:bg-white/[0.15] rounded-full flex items-center justify-center text-slate-300 font-bold">×</button>
       </div>
@@ -555,8 +1021,8 @@
         <button onclick="saveServerConfigAndSync()" class="w-full py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 to-indigo-600 text-white text-xs font-bold shadow-lg shadow-cyan-500/25 active:scale-98 transition">
           保存并立即拉取云端数据
         </button>
-        <button onclick="resetToMockData()" class="w-full py-2 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/20 text-rose-300 text-[11px] active:scale-98 transition">
-          重置并恢复初始4名员工演示数据
+        <button onclick="clearCacheAndSyncFromCloud()" class="w-full py-2 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/20 text-rose-300 text-[11px] active:scale-98 transition">
+          清空本地缓存并从云端重新拉取
         </button>
       </div>
     </div>
@@ -664,7 +1130,7 @@
       }
       updateCloudStatusBadge(null, "正在同步...");
       try {
-        const todayStr = "2026-11-07";
+        const todayStr = currentDateStr;
         const [empRes, recRes] = await Promise.all([
           fetch(`${API_BASE}/employees`),
           fetch(`${API_BASE}/records?date=${todayStr}`)
@@ -700,67 +1166,97 @@
       }
     }
 
-    // ================= 本地持久化与默认演示数据 =================
-    const defaultMockEmployees = [
-      {
-        id: 101,
-        no: "EMP-001",
-        name: "陈晓",
-        phone: "13800138001",
-        avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=60",
-        annualTotalHours: 40,
-        annualRemainHours: 32,
-        sickTotalHours: 80,
-        sickRemainHours: 80,
-        compLeaveHours: 4,
-        records: [
-          { id: 1001, category: "leave", type: "调休", hours: 4 }
-        ]
-      },
-      {
-        id: 102,
-        no: "EMP-002",
-        name: "张健",
-        phone: "13912345678",
-        avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&auto=format&fit=crop&q=60",
-        annualTotalHours: 80,
-        annualRemainHours: 64,
-        sickTotalHours: 80,
-        sickRemainHours: 72,
-        compLeaveHours: 12,
-        records: []
-      },
-      {
-        id: 103,
-        no: "EMP-003",
-        name: "李慧敏",
-        phone: "13766668888",
-        avatar: "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=100&auto=format&fit=crop&q=60",
-        annualTotalHours: 40,
-        annualRemainHours: 16,
-        sickTotalHours: 80,
-        sickRemainHours: 80,
-        compLeaveHours: 4,
-        records: [
-          { id: 1002, category: "leave", type: "年假", hours: 8 }
-        ]
-      },
-      {
-        id: 104,
-        no: "EMP-004",
-        name: "王强",
-        phone: "15988889999",
-        avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&auto=format&fit=crop&q=60",
-        annualTotalHours: 56,
-        annualRemainHours: 56,
-        sickTotalHours: 80,
-        sickRemainHours: 64,
-        compLeaveHours: 8,
-        records: [
-          { id: 1003, category: "ot", type: "值班", hours: 4 }
-        ]
+    // ================= 全局明/暗模式管理 (默认“明”，可切换“暗”) =================
+    let currentTheme = 'light';
+    try {
+      const savedTheme = localStorage.getItem('app-theme');
+      currentTheme = (savedTheme === 'dark') ? 'dark' : 'light';
+    } catch(e) {
+      currentTheme = 'light';
+    }
+
+    function updateThemeUI(theme) {
+      const isLight = (theme === 'light');
+      const body = document.body;
+      const html = document.documentElement;
+      const switchBox = document.getElementById('theme-segmented-switch');
+      const optLight = document.getElementById('pill-opt-light');
+      const optDark = document.getElementById('pill-opt-dark');
+      const metaTheme = document.querySelector('meta[name="theme-color"]');
+
+      if (isLight) {
+        body.classList.add('theme-light');
+        html.classList.add('theme-light');
+        if (metaTheme) metaTheme.setAttribute('content', '#F1F4F9');
+        if (switchBox) {
+          switchBox.className = "inline-flex items-center p-0.5 rounded-full border border-slate-300/80 bg-slate-200/80 backdrop-blur-md shadow-xs select-none transition-all cursor-pointer";
+        }
+        if (optLight) {
+          optLight.className = "flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold transition-all shadow-xs bg-white text-indigo-700";
+        }
+        if (optDark) {
+          optDark.className = "flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium transition-all text-slate-500 hover:text-slate-800";
+        }
+      } else {
+        body.classList.remove('theme-light');
+        html.classList.remove('theme-light');
+        if (metaTheme) metaTheme.setAttribute('content', '#0B0F1C');
+        if (switchBox) {
+          switchBox.className = "inline-flex items-center p-0.5 rounded-full border border-white/[0.12] bg-slate-900/80 backdrop-blur-md shadow-xs select-none transition-all cursor-pointer";
+        }
+        if (optLight) {
+          optLight.className = "flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium transition-all text-slate-400 hover:text-slate-200";
+        }
+        if (optDark) {
+          optDark.className = "flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold transition-all shadow-xs bg-indigo-600 text-white border border-indigo-400/40";
+        }
       }
+    }
+
+    function applyTheme(theme) {
+      currentTheme = theme;
+      try {
+        localStorage.setItem('app-theme', theme);
+      } catch(e) {}
+      updateThemeUI(theme);
+    }
+
+    function toggleTheme(forcedTheme) {
+      const next = forcedTheme || (currentTheme === 'light' ? 'dark' : 'light');
+      applyTheme(next);
+      showToast(next === 'light' ? '已切换至明亮模式 ☀️' : '已切换至暗黑模式 🌙');
+    }
+
+    // ================= 全局日期管理与联动状态 =================
+    function getTodayDateStr() {
+      const now = new Date();
+      const y = now.getFullYear();
+      const m = String(now.getMonth() + 1).padStart(2, '0');
+      const d = String(now.getDate()).padStart(2, '0');
+      return `${y}-${m}-${d}`;
+    }
+
+    function getOffsetDateStr(offsetDays) {
+      const now = new Date();
+      now.setDate(now.getDate() + offsetDays);
+      const y = now.getFullYear();
+      const m = String(now.getMonth() + 1).padStart(2, '0');
+      const d = String(now.getDate()).padStart(2, '0');
+      return `${y}-${m}-${d}`;
+    }
+
+    const todayStr = getTodayDateStr();
+    const yesterdayStr = getOffsetDateStr(-1);
+    let currentDateStr = todayStr; // 默认锁定为当日（不可超过当日）
+
+    // ================= 生产数据与本地持久化 =================
+    const defaultOvertimeTypes = [
+      { id: "ot_duty", name: "值班", desc: "周末/假期轮岗值守", isSystem: true },
+      { id: "ot_work", name: "加班", desc: "日常任务或紧急项目加点", isSystem: true }
     ];
+    let overtimeTypes = [];
+    const defaultMockEmployees = [];
+    let employees = [];
 
     function persistLocalState() {
       try {
@@ -771,38 +1267,23 @@
       }
     }
 
-    function resetToMockData() {
-      if (confirm('确认要清除所有本地修改，恢复到初始的4名员工演示数据吗？')) {
+    function clearCacheAndSyncFromCloud() {
+      if (confirm('确认要清空本地缓存并从云端数据库重新拉取全员数据吗？')) {
         localStorage.removeItem('huaxingyuan_employees_data');
-        localStorage.removeItem('huaxingyuan_overtime_types');
-        employees = JSON.parse(JSON.stringify(defaultMockEmployees));
-        overtimeTypes = JSON.parse(JSON.stringify(defaultOvertimeTypes));
+        employees = [];
         persistLocalState();
         renderDailyList();
         renderSummary();
         renderRosterList();
-        showToast('已重置恢复至初始演示数据！');
+        if (API_BASE) {
+          syncDataFromCloud();
+        } else {
+          showToast('已清空本地缓存！');
+        }
       }
     }
 
-    let employees = [];
-    const savedEmployees = localStorage.getItem('huaxingyuan_employees_data');
-    if (savedEmployees) {
-      try {
-        employees = JSON.parse(savedEmployees);
-      } catch (e) {
-        employees = JSON.parse(JSON.stringify(defaultMockEmployees));
-      }
-    } else {
-      employees = JSON.parse(JSON.stringify(defaultMockEmployees));
-      persistLocalState();
-    }
-
-    const defaultOvertimeTypes = [
-      { id: "ot_duty", name: "值班", desc: "周末/假期轮岗值守", isSystem: true },
-      { id: "ot_work", name: "加班", desc: "日常任务或紧急项目加点", isSystem: true }
-    ];
-    let overtimeTypes = [];
+    // 初始化加班类型持久化
     const savedOtTypes = localStorage.getItem('huaxingyuan_overtime_types');
     if (savedOtTypes) {
       try {
@@ -812,6 +1293,30 @@
       }
     } else {
       overtimeTypes = JSON.parse(JSON.stringify(defaultOvertimeTypes));
+    }
+
+    // 初始化员工与考勤记录持久化（支持向前兼容未标日期的记录）
+    const savedEmployees = localStorage.getItem('huaxingyuan_employees_data');
+    if (savedEmployees) {
+      try {
+        employees = JSON.parse(savedEmployees);
+        if (Array.isArray(employees)) {
+          employees.forEach(emp => {
+            if (emp.records && Array.isArray(emp.records)) {
+              emp.records.forEach(r => {
+                if (!r.date) r.date = todayStr;
+              });
+            }
+          });
+        } else {
+          employees = [];
+        }
+      } catch (e) {
+        employees = [];
+      }
+    } else {
+      employees = [];
+      persistLocalState();
     }
 
     let activeEmpId = null;
@@ -825,11 +1330,22 @@
       const container = document.getElementById('daily-attendance-list');
       container.innerHTML = '';
 
+      if (!employees || employees.length === 0) {
+        container.innerHTML = `
+          <div class="glass-card rounded-2xl p-6 text-center text-slate-400 space-y-2">
+            <div class="w-12 h-12 mx-auto rounded-full bg-indigo-500/10 flex items-center justify-center text-indigo-400 text-xl">👥</div>
+            <div class="text-xs font-semibold text-white">暂无员工考勤数据</div>
+            <p class="text-[11px] text-slate-400">正在连接云端数据库，或点击底部【员工档案】录入新员工</p>
+          </div>
+        `;
+        return;
+      }
+
       employees.forEach(emp => {
         const card = document.createElement('div');
         card.className = "glass-card rounded-2xl p-3.5 transition hover:border-indigo-500/30 shadow-lg";
 
-        const recs = emp.records || [];
+        const recs = (emp.records || []).filter(r => (r.date === currentDateStr) || (!r.date && currentDateStr === todayStr));
         let statusBadge = '';
 
         if (recs.length === 0) {
@@ -902,7 +1418,7 @@
             </div>
           ` : `
             <div class="mt-1.5 text-right">
-              <span class="text-[10px] text-slate-500">今日全勤无假勤，可直接点击上方登记</span>
+              <span class="text-[10px] text-slate-500">当日全勤无假勤，可直接点击上方登记</span>
             </div>
           `}
         `;
@@ -915,6 +1431,17 @@
       const countEl = document.getElementById('roster-count');
       if (countEl) countEl.innerText = employees.length;
       container.innerHTML = '';
+
+      if (!employees || employees.length === 0) {
+        container.innerHTML = `
+          <div class="glass-card rounded-2xl p-6 text-center text-slate-400 space-y-2">
+            <div class="w-12 h-12 mx-auto rounded-full bg-indigo-500/10 flex items-center justify-center text-indigo-400 text-xl">📋</div>
+            <div class="text-xs font-semibold text-white">花名册暂无员工档案</div>
+            <p class="text-[11px] text-slate-400">点击右上角「+ 录入员工」添加档案，或点击「云端配置」同步数据库</p>
+          </div>
+        `;
+        return;
+      }
 
       employees.forEach(emp => {
         const item = document.createElement('div');
@@ -929,9 +1456,10 @@
                 <span class="text-[10px] text-slate-400 bg-white/[0.06] px-1 py-0.2 rounded font-mono">${emp.no}</span>
               </div>
               <div class="text-[11px] text-slate-400 font-mono mt-0.5">${emp.phone}</div>
-              <div class="flex items-center gap-2 mt-1 text-[10px]">
+              <div class="flex items-center flex-wrap gap-1.5 mt-1 text-[10px]">
                 <span class="text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-1.5 py-0.2 rounded">年假: ${emp.annualTotalHours}h (余${emp.annualRemainHours}h)</span>
                 <span class="text-rose-400 bg-rose-500/10 border border-rose-500/20 px-1.5 py-0.2 rounded">病假: ${emp.sickTotalHours}h (余${emp.sickRemainHours}h)</span>
+                <span class="text-purple-400 bg-purple-500/10 border border-purple-500/20 px-1.5 py-0.2 rounded font-medium">调休余: ${emp.compLeaveHours || 0}h</span>
               </div>
             </div>
           </div>
@@ -969,6 +1497,8 @@
       document.getElementById('lbl-sick-hours').innerText = `(${emp.sickTotalHours}h)`;
       document.getElementById('inp-sick-remain').value = emp.sickRemainHours;
 
+      document.getElementById('inp-comp-hours').value = emp.compLeaveHours || 0;
+
       document.getElementById('modal-employee').classList.remove('hidden');
     }
 
@@ -989,6 +1519,8 @@
       document.getElementById('inp-sick-days').value = 10;
       document.getElementById('lbl-sick-hours').innerText = "(80h)";
       document.getElementById('inp-sick-remain').value = 80;
+
+      document.getElementById('inp-comp-hours').value = 0;
 
       document.getElementById('modal-employee').classList.remove('hidden');
     }
@@ -1015,6 +1547,7 @@
       const aRemain = parseInt(document.getElementById('inp-annual-remain').value) || 0;
       const sDays = parseInt(document.getElementById('inp-sick-days').value) || 0;
       const sRemain = parseInt(document.getElementById('inp-sick-remain').value) || 0;
+      const compRemain = parseFloat(document.getElementById('inp-comp-hours').value) || 0;
       const avatar = document.getElementById('emp-avatar-preview').src;
 
       if (!name) {
@@ -1033,7 +1566,20 @@
           emp.annualRemainHours = aRemain;
           emp.sickTotalHours = sDays * 8;
           emp.sickRemainHours = sRemain;
+          emp.compLeaveHours = compRemain;
           showToast(`已保存员工【${name}】的档案与配额！`);
+
+          if (API_BASE) {
+            fetch(`${API_BASE}/employees/${editingEmpId}`, {
+              method: 'PUT',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                name, no, phone, avatar,
+                annualTotalHours: aDays * 8,
+                sickTotalHours: sDays * 8
+              })
+            }).catch(err => console.warn("云端更新员工失败:", err));
+          }
         }
       } else {
         const newEmp = {
@@ -1046,11 +1592,31 @@
           annualRemainHours: aRemain,
           sickTotalHours: sDays * 8,
           sickRemainHours: sRemain,
-          compLeaveHours: 0,
+          compLeaveHours: compRemain,
           records: []
         };
         employees.push(newEmp);
         showToast(`新员工【${name}】已成功录入！`);
+
+        if (API_BASE) {
+          fetch(`${API_BASE}/employees`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              no: newEmp.no,
+              name: newEmp.name,
+              phone: newEmp.phone,
+              avatar: newEmp.avatar,
+              annualTotalHours: newEmp.annualTotalHours,
+              sickTotalHours: newEmp.sickTotalHours
+            })
+          }).then(res => res.json()).then(data => {
+            if (data.success && data.id) {
+              newEmp.id = data.id;
+              persistLocalState();
+            }
+          }).catch(err => console.warn("云端新增员工失败:", err));
+        }
       }
 
       closeEmployeeModal();
@@ -1064,13 +1630,20 @@
       if (!editingEmpId) return;
       const emp = employees.find(e => e.id === editingEmpId);
       if (confirm(`确认要删除员工【${emp.name}】吗？`)) {
-        employees = employees.filter(e => e.id !== editingEmpId);
+        const delId = editingEmpId;
+        employees = employees.filter(e => e.id !== delId);
         persistLocalState();
         closeEmployeeModal();
         renderRosterList();
         renderDailyList();
         renderSummary();
         showToast(`已删除员工【${emp.name}】`);
+
+        if (API_BASE) {
+          fetch(`${API_BASE}/employees/${delId}`, {
+            method: 'DELETE'
+          }).catch(err => console.warn("云端删除员工失败:", err));
+        }
       }
     }
 
@@ -1130,18 +1703,117 @@
       renderDailyList();
       renderSummary();
       showToast(`已批量更新 ${selectedIds.length} 位员工的年假与病假额度！`);
+
+      if (API_BASE) {
+        fetch(`${API_BASE}/employees/batch-quotas`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            empIds: selectedIds,
+            annualQuota: aDays * 8,
+            sickQuota: sDays * 8
+          })
+        }).catch(err => console.warn("云端批量更新配额失败:", err));
+      }
     }
 
+    // ================= 手机拍照与相册选择真实处理引擎 =================
     function triggerPhoto(type) {
-      showToast(type === 'camera' ? "已调起系统相机进行免冠拍照" : "已打开手机系统相册选择照片");
-      document.getElementById('emp-avatar-preview').src = "https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=100&auto=format&fit=crop&q=60";
+      if (type === 'camera') {
+        const camInp = document.getElementById('inp-photo-camera');
+        if (camInp) {
+          camInp.value = '';
+          camInp.click();
+        }
+      } else {
+        const galInp = document.getElementById('inp-photo-gallery');
+        if (galInp) {
+          galInp.value = '';
+          galInp.click();
+        }
+      }
+    }
+
+    function handlePhotoFileSelected(input) {
+      if (!input || !input.files || !input.files[0]) return;
+      const file = input.files[0];
+      showToast("正在读取并优化照片...");
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const rawDataUrl = e.target.result;
+        compressImage(rawDataUrl, 400, 400, 0.85, function(compressedDataUrl) {
+          const previewImg = document.getElementById('emp-avatar-preview');
+          if (previewImg) {
+            previewImg.src = compressedDataUrl;
+          }
+          showToast("员工照片已更新！");
+
+          if (API_BASE) {
+            uploadAvatarToCloud(file);
+          }
+        });
+      };
+      reader.onerror = function() {
+        showToast("读取图片失败，请重试");
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function compressImage(src, maxWidth, maxHeight, quality, callback) {
+      const img = new Image();
+      img.onload = function() {
+        let w = img.width;
+        let h = img.height;
+        if (w > maxWidth || h > maxHeight) {
+          if (w / h > maxWidth / maxHeight) {
+            h = Math.round((h * maxWidth) / w);
+            w = maxWidth;
+          } else {
+            w = Math.round((w * maxHeight) / h);
+            h = maxHeight;
+          }
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width = w;
+        canvas.height = h;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, w, h);
+        const dataUrl = canvas.toDataURL('image/jpeg', quality);
+        callback(dataUrl);
+      };
+      img.onerror = function() {
+        callback(src);
+      };
+      img.src = src;
+    }
+
+    async function uploadAvatarToCloud(file) {
+      if (!API_BASE) return;
+      try {
+        const formData = new FormData();
+        formData.append('avatar', file);
+        const res = await fetch(`${API_BASE}/upload-avatar`, {
+          method: 'POST',
+          body: formData
+        });
+        if (res.ok) {
+          const json = await res.json();
+          if (json.success && json.url) {
+            const previewImg = document.getElementById('emp-avatar-preview');
+            if (previewImg) previewImg.src = json.url;
+          }
+        }
+      } catch (err) {
+        console.warn("上传云端头像未完成，使用本地高清压缩头像:", err);
+      }
     }
 
     function openLeaveModal(empId) {
       activeEmpId = empId;
       const emp = employees.find(e => e.id === empId);
       document.getElementById('leave-modal-empname').innerText = emp.name;
-      document.getElementById('leave-modal-quota-tip').innerText = `年假余: ${emp.annualRemainHours}h | 病假余: ${emp.sickRemainHours}h | 调休余: ${emp.compLeaveHours}h`;
+      document.getElementById('leave-modal-quota-tip').innerText = `登记考勤日: ${currentDateStr} · 年假余: ${emp.annualRemainHours}h | 病假余: ${emp.sickRemainHours}h | 调休余: ${emp.compLeaveHours}h`;
       
       const badgeAnnual = document.getElementById('lt-badge-年假');
       const badgeSick = document.getElementById('lt-badge-病假');
@@ -1277,6 +1949,7 @@
       if (!emp.records) emp.records = [];
       emp.records.push({
         id: Date.now(),
+        date: currentDateStr,
         category: 'leave',
         type: selectedLeaveType,
         hours: selectedLeaveHours
@@ -1294,7 +1967,7 @@
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             empId: emp.id,
-            date: "2026-11-07",
+            date: currentDateStr,
             category: 'leave',
             typeName: selectedLeaveType,
             hours: selectedLeaveHours
@@ -1341,6 +2014,8 @@
       const emp = employees.find(e => e.id === empId);
       document.getElementById('ot-modal-empname').innerText = emp.name;
       document.getElementById('ot-modal-cur-comp').innerText = `${emp.compLeaveHours}h`;
+      const otSub = document.getElementById('ot-modal-subtitle');
+      if (otSub) otSub.innerText = `登记考勤日: ${currentDateStr} · 工时 1:1 存入调休池`;
       selectOtType(overtimeTypes[0].name);
       selectOtHours(4);
       document.getElementById('modal-ot').classList.remove('hidden');
@@ -1394,6 +2069,7 @@
       if (!emp.records) emp.records = [];
       emp.records.push({
         id: Date.now(),
+        date: currentDateStr,
         category: 'ot',
         type: selectedOtType,
         hours: selectedOtHours
@@ -1411,7 +2087,7 @@
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             empId: emp.id,
-            date: "2026-11-07",
+            date: currentDateStr,
             category: 'overtime',
             typeName: selectedOtType,
             hours: selectedOtHours
@@ -1496,7 +2172,8 @@
         const row = document.createElement('div');
         row.className = "p-3 flex items-center justify-between hover:bg-white/[0.04] transition cursor-pointer text-xs";
         row.onclick = () => showToast(`查看 ${emp.name} 的逐日考勤与扣减明细`);
-        const recCount = emp.records ? emp.records.length : 0;
+        const dayRecs = (emp.records || []).filter(r => (r.date === currentDateStr) || (!r.date && currentDateStr === todayStr));
+        const recCount = dayRecs.length;
         row.innerHTML = `
           <div class="flex items-center gap-2.5">
             <img src="${emp.avatar}" class="w-8 h-8 rounded-full object-cover border border-white/[0.1]">
@@ -1509,7 +2186,7 @@
           </div>
           <div class="text-right">
             <div class="font-bold text-purple-400">调休存: ${emp.compLeaveHours}h</div>
-            <div class="text-[10px] ${recCount > 0 ? 'text-amber-400 font-medium' : 'text-slate-500'} mt-0.5">今日${recCount > 0 ? recCount + '条记录' : '全勤'} &gt;</div>
+            <div class="text-[10px] ${recCount > 0 ? 'text-amber-400 font-medium' : 'text-slate-500'} mt-0.5">当日${recCount > 0 ? recCount + '条记录' : '全勤'} &gt;</div>
           </div>
         `;
         table.appendChild(row);
@@ -1560,15 +2237,896 @@
       }, 1800);
     }
 
+    // ================= 导出统计表与对账报表引擎 =================
+    let exportCurrentMode = 'month'; // 'month' | 'range'
+    let exportSelectedYear = 2026;
+    let exportSelectedMonth = 11;
+    let exportStartDate = '2026-11-01';
+    let exportEndDate = '2026-11-08';
+
+    function openExportModal() {
+      const today = getTodayDateStr();
+      const parts = today.split('-');
+      exportSelectedYear = parseInt(parts[0], 10);
+      exportSelectedMonth = parseInt(parts[1], 10);
+
+      // 默认按月份模式，首日到今天
+      exportStartDate = `${parts[0]}-${parts[1]}-01`;
+      exportEndDate = today;
+
+      const sInp = document.getElementById('export-start-date');
+      const eInp = document.getElementById('export-end-date');
+      if (sInp) { sInp.value = exportStartDate; sInp.max = today; }
+      if (eInp) { eInp.value = exportEndDate; eInp.max = today; }
+
+      switchExportMode('month');
+      renderExportMonthPills();
+      updateExportPreviewStats();
+
+      const modal = document.getElementById('modal-export');
+      if (modal) modal.classList.remove('hidden');
+    }
+
+    function closeExportModal() {
+      const modal = document.getElementById('modal-export');
+      if (modal) modal.classList.add('hidden');
+    }
+
     function exportExcelReport() {
-      showToast("正在导出: 2026年11月考勤与假期余额流水表.xlsx");
+      openExportModal();
+    }
+
+    function switchExportMode(mode) {
+      exportCurrentMode = mode;
+      const monthBtn = document.getElementById('tab-btn-export-month');
+      const rangeBtn = document.getElementById('tab-btn-export-range');
+      const monthDiv = document.getElementById('export-mode-month');
+      const rangeDiv = document.getElementById('export-mode-range');
+
+      if (mode === 'month') {
+        if (monthBtn) monthBtn.className = "py-1.5 rounded-lg font-bold text-center transition bg-emerald-500/20 text-emerald-300 border border-emerald-500/30";
+        if (rangeBtn) rangeBtn.className = "py-1.5 rounded-lg font-medium text-slate-400 text-center transition hover:text-white";
+        if (monthDiv) monthDiv.classList.remove('hidden');
+        if (rangeDiv) rangeDiv.classList.add('hidden');
+        selectExportMonth(exportSelectedYear, exportSelectedMonth);
+      } else {
+        if (rangeBtn) rangeBtn.className = "py-1.5 rounded-lg font-bold text-center transition bg-emerald-500/20 text-emerald-300 border border-emerald-500/30";
+        if (monthBtn) monthBtn.className = "py-1.5 rounded-lg font-medium text-slate-400 text-center transition hover:text-white";
+        if (rangeDiv) rangeDiv.classList.remove('hidden');
+        if (monthDiv) monthDiv.classList.add('hidden');
+        onExportDateChange();
+      }
+    }
+
+    function renderExportMonthPills() {
+      const container = document.getElementById('export-month-pills');
+      if (!container) return;
+
+      const today = getTodayDateStr();
+      const parts = today.split('-');
+      const curY = parseInt(parts[0], 10);
+      const curM = parseInt(parts[1], 10);
+
+      const months = [];
+      for (let i = 0; i < 6; i++) {
+        let m = curM - i;
+        let y = curY;
+        while (m < 1) {
+          m += 12;
+          y -= 1;
+        }
+        months.push({ year: y, month: m, isCurrent: i === 0 });
+      }
+
+      container.innerHTML = months.map(item => {
+        const isSel = (item.year === exportSelectedYear && item.month === exportSelectedMonth);
+        return `
+          <button onclick="selectExportMonth(${item.year}, ${item.month})" class="py-2 px-1.5 rounded-xl border text-center transition active:scale-95 ${
+            isSel
+              ? 'bg-emerald-500/20 border-emerald-400/50 text-emerald-300 font-bold shadow-[0_0_10px_rgba(16,185,129,0.2)]'
+              : 'bg-white/[0.04] border-white/[0.08] hover:bg-white/[0.08] text-slate-300 font-medium'
+          }">
+            <div class="text-xs font-semibold">${item.year}年${item.month}月</div>
+            <div class="text-[10px] text-slate-400 mt-0.5">${item.isCurrent ? '本月(当月)' : '整月统计'}</div>
+          </button>
+        `;
+      }).join('');
+    }
+
+    function selectExportMonth(year, month) {
+      exportSelectedYear = year;
+      exportSelectedMonth = month;
+      renderExportMonthPills();
+
+      const ymStr = `${year}-${String(month).padStart(2, '0')}`;
+      const lastDay = new Date(year, month, 0).getDate();
+      const today = getTodayDateStr();
+
+      exportStartDate = `${ymStr}-01`;
+      const fullMonthEnd = `${ymStr}-${String(lastDay).padStart(2, '0')}`;
+      exportEndDate = (fullMonthEnd > today) ? today : fullMonthEnd;
+
+      updateExportPreviewStats();
+    }
+
+    function setExportRangeShortcut(shortcut) {
+      const today = getTodayDateStr();
+      const parts = today.split('-');
+      const y = parseInt(parts[0], 10);
+      const m = parseInt(parts[1], 10);
+
+      if (shortcut === 'month-to-date') {
+        exportStartDate = `${parts[0]}-${parts[1]}-01`;
+        exportEndDate = today;
+      } else if (shortcut === 'last-7-days') {
+        exportStartDate = getOffsetDateStr(-6);
+        exportEndDate = today;
+      } else if (shortcut === 'last-30-days') {
+        exportStartDate = getOffsetDateStr(-29);
+        exportEndDate = today;
+      } else if (shortcut === 'last-month') {
+        let prevM = m - 1;
+        let prevY = y;
+        if (prevM < 1) { prevM = 12; prevY--; }
+        const lastDay = new Date(prevY, prevM, 0).getDate();
+        exportStartDate = `${prevY}-${String(prevM).padStart(2, '0')}-01`;
+        exportEndDate = `${prevY}-${String(prevM).padStart(2, '0')}-${String(lastDay).padStart(2, '0')}`;
+      }
+
+      const sInp = document.getElementById('export-start-date');
+      const eInp = document.getElementById('export-end-date');
+      if (sInp) sInp.value = exportStartDate;
+      if (eInp) eInp.value = exportEndDate;
+
+      updateExportPreviewStats();
+    }
+
+    function onExportDateChange() {
+      const sInp = document.getElementById('export-start-date');
+      const eInp = document.getElementById('export-end-date');
+      if (!sInp || !eInp) return;
+
+      const today = getTodayDateStr();
+      let sVal = sInp.value || '2026-11-01';
+      let eVal = eInp.value || today;
+
+      if (eVal > today) {
+        showToast("截止日期不可超过当日");
+        eVal = today;
+        eInp.value = today;
+      }
+      if (sVal > eVal) {
+        sVal = eVal;
+        sInp.value = eVal;
+      }
+
+      exportStartDate = sVal;
+      exportEndDate = eVal;
+      updateExportPreviewStats();
+    }
+
+    function updateExportPreviewStats() {
+      const rangeEl = document.getElementById('export-preview-range');
+      const empsEl = document.getElementById('export-preview-emps');
+      const recsEl = document.getElementById('export-preview-records');
+
+      const sParts = exportStartDate.split('-');
+      const eParts = exportEndDate.split('-');
+      const sObj = new Date(parseInt(sParts[0], 10), parseInt(sParts[1], 10) - 1, parseInt(sParts[2], 10));
+      const eObj = new Date(parseInt(eParts[0], 10), parseInt(eParts[1], 10) - 1, parseInt(eParts[2], 10));
+      const daysDiff = Math.round((eObj - sObj) / 86400000) + 1;
+
+      if (rangeEl) {
+        rangeEl.innerText = `${exportStartDate} 至 ${exportEndDate} (共 ${daysDiff} 天)`;
+      }
+      if (empsEl) {
+        empsEl.innerText = `全体员工 (共 ${employees ? employees.length : 0} 人)`;
+      }
+
+      let totalCount = 0;
+      let leaveCount = 0;
+      let otCount = 0;
+      (employees || []).forEach(emp => {
+        (emp.records || []).forEach(r => {
+          if (r.date >= exportStartDate && r.date <= exportEndDate) {
+            totalCount++;
+            if (r.category === 'leave') leaveCount++;
+            if (r.category === 'ot') otCount++;
+          }
+        });
+      });
+
+      if (recsEl) {
+        recsEl.innerText = `共 ${totalCount} 条明细 (请假 ${leaveCount} 条 · 加班 ${otCount} 条)`;
+      }
+    }
+
+    function escapeXml(str) {
+      if (str == null) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&apos;');
+    }
+
+    function executeExcelExport() {
+      const startDate = exportStartDate;
+      const endDate = exportEndDate;
+      const weekNames = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
+
+      const summaryRows = [];
+      const detailRows = [];
+
+      let grandTotalLeaveH = 0;
+      let grandTotalAnnualH = 0;
+      let grandTotalSickH = 0;
+      let grandTotalCompH = 0;
+      let grandTotalPersonalH = 0;
+      let grandTotalOtH = 0;
+      let grandTotalDutyH = 0;
+      let grandTotalEarnedH = 0;
+      let grandTotalCompRemain = 0;
+      let grandTotalAnnualRemain = 0;
+      let grandTotalSickRemain = 0;
+
+      (employees || []).forEach((emp, idx) => {
+        const recs = (emp.records || []).filter(r => r.date >= startDate && r.date <= endDate);
+        let aH = 0, sH = 0, cH = 0, pH = 0, otH = 0, dtH = 0;
+
+        recs.forEach(r => {
+          if (r.category === 'leave') {
+            if (r.type === '年假') aH += r.hours;
+            else if (r.type === '病假') sH += r.hours;
+            else if (r.type === '调休') cH += r.hours;
+            else pH += r.hours;
+          } else if (r.category === 'ot') {
+            if (r.type === '值班') dtH += r.hours;
+            else otH += r.hours;
+          }
+
+          const p = r.date.split('-');
+          const dObj = new Date(parseInt(p[0], 10), parseInt(p[1], 10) - 1, parseInt(p[2], 10));
+          const wStr = weekNames[dObj.getDay()];
+
+          let ruleDesc = '';
+          if (r.category === 'leave') {
+            ruleDesc = r.type === '年假' ? '扣减年假额度' : r.type === '病假' ? '扣减病假额度' : r.type === '调休' ? '扣减调休结存' : '人事备案假';
+          } else {
+            ruleDesc = '工时 1:1 计入调休结存池';
+          }
+
+          detailRows.push({
+            id: r.id,
+            date: r.date,
+            week: wStr,
+            empNo: emp.no,
+            name: emp.name,
+            category: r.category === 'leave' ? '请假' : '加班/值班',
+            type: r.type,
+            hours: r.hours,
+            days: (r.hours / 8).toFixed(1),
+            ruleDesc: ruleDesc
+          });
+        });
+
+        const totalLeaveH = aH + sH + cH + pH;
+        const totalEarnedH = otH + dtH;
+
+        grandTotalLeaveH += totalLeaveH;
+        grandTotalAnnualH += aH;
+        grandTotalSickH += sH;
+        grandTotalCompH += cH;
+        grandTotalPersonalH += pH;
+        grandTotalOtH += otH;
+        grandTotalDutyH += dtH;
+        grandTotalEarnedH += totalEarnedH;
+        grandTotalCompRemain += (emp.compLeaveHours || 0);
+        grandTotalAnnualRemain += (emp.annualRemainHours || 0);
+        grandTotalSickRemain += (emp.sickRemainHours || 0);
+
+        let evalStatus = '全勤在岗';
+        if (totalLeaveH > 0 && totalEarnedH > 0) evalStatus = '有休假与加班';
+        else if (totalLeaveH > 0) evalStatus = `休假 ${totalLeaveH}h`;
+        else if (totalEarnedH > 0) evalStatus = `加班 ${totalEarnedH}h`;
+
+        summaryRows.push({
+          idx: idx + 1,
+          empNo: emp.no,
+          name: emp.name,
+          phone: emp.phone,
+          totalLeaveH,
+          totalLeaveDays: (totalLeaveH / 8).toFixed(1),
+          aH,
+          sH,
+          cH,
+          pH,
+          otH,
+          dtH,
+          totalEarnedH,
+          compRemain: emp.compLeaveHours || 0,
+          annualRemain: emp.annualRemainHours || 0,
+          sickRemain: emp.sickRemainHours || 0,
+          evalStatus
+        });
+      });
+
+      detailRows.sort((a, b) => a.date.localeCompare(b.date) || a.empNo.localeCompare(b.empNo));
+      const nowStr = new Date().toLocaleString('zh-CN', { hour12: false });
+
+      let xml = `<?xml version="1.0" encoding="UTF-8"?>
+<?mso-application progid="Excel.Sheet"?>
+<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet"
+  xmlns:o="urn:schemas-microsoft-com:office:office"
+  xmlns:x="urn:schemas-microsoft-com:office:excel"
+  xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet"
+  xmlns:html="http://www.w3.org/TR/REC-html40">
+  <DocumentProperties xmlns="urn:schemas-microsoft-com:office:office">
+    <Title>华星园社区考勤与假勤对账报表</Title>
+    <Author>华星园社区AI智能考勤系统</Author>
+    <Created>${escapeXml(new Date().toISOString())}</Created>
+  </DocumentProperties>
+  <Styles>
+    <Style ss:ID="Default" ss:Name="Normal">
+      <Alignment ss:Vertical="Center"/>
+      <Borders/>
+      <Font ss:FontName="微软雅黑" ss:Size="10" ss:Color="#333333"/>
+      <Interior/>
+      <NumberFormat/>
+      <Protection/>
+    </Style>
+    <Style ss:ID="TitleHeader">
+      <Font ss:FontName="微软雅黑" ss:Size="14" ss:Bold="1" ss:Color="#0F172A"/>
+      <Alignment ss:Horizontal="Left" ss:Vertical="Center"/>
+    </Style>
+    <Style ss:ID="SubHeader">
+      <Font ss:FontName="微软雅黑" ss:Size="10" ss:Color="#64748B"/>
+      <Alignment ss:Horizontal="Left" ss:Vertical="Center"/>
+    </Style>
+    <Style ss:ID="ThStyle">
+      <Font ss:FontName="微软雅黑" ss:Size="10" ss:Bold="1" ss:Color="#FFFFFF"/>
+      <Interior ss:Color="#1E293B" ss:Pattern="Solid"/>
+      <Alignment ss:Horizontal="Center" ss:Vertical="Center" ss:WrapText="1"/>
+      <Borders>
+        <Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#94A3B8"/>
+        <Border ss:Position="Left" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#334155"/>
+        <Border ss:Position="Right" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#334155"/>
+        <Border ss:Position="Top" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#334155"/>
+      </Borders>
+    </Style>
+    <Style ss:ID="TdCenter">
+      <Alignment ss:Horizontal="Center" ss:Vertical="Center"/>
+      <Borders>
+        <Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#CBD5E1"/>
+        <Border ss:Position="Left" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#E2E8F0"/>
+        <Border ss:Position="Right" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#E2E8F0"/>
+        <Border ss:Position="Top" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#CBD5E1"/>
+      </Borders>
+    </Style>
+    <Style ss:ID="TdNumber">
+      <Alignment ss:Horizontal="Right" ss:Vertical="Center"/>
+      <Borders>
+        <Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#CBD5E1"/>
+        <Border ss:Position="Left" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#E2E8F0"/>
+        <Border ss:Position="Right" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#E2E8F0"/>
+        <Border ss:Position="Top" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#CBD5E1"/>
+      </Borders>
+    </Style>
+    <Style ss:ID="TotalRowStyle">
+      <Font ss:FontName="微软雅黑" ss:Size="10" ss:Bold="1" ss:Color="#0F172A"/>
+      <Interior ss:Color="#E2E8F0" ss:Pattern="Solid"/>
+      <Alignment ss:Horizontal="Center" ss:Vertical="Center"/>
+      <Borders>
+        <Border ss:Position="Bottom" ss:LineStyle="Double" ss:Weight="3" ss:Color="#64748B"/>
+        <Border ss:Position="Top" ss:LineStyle="Continuous" ss:Weight="2" ss:Color="#64748B"/>
+      </Borders>
+    </Style>
+    <Style ss:ID="TotalNumStyle">
+      <Font ss:FontName="微软雅黑" ss:Size="10" ss:Bold="1" ss:Color="#0F172A"/>
+      <Interior ss:Color="#E2E8F0" ss:Pattern="Solid"/>
+      <Alignment ss:Horizontal="Right" ss:Vertical="Center"/>
+      <Borders>
+        <Border ss:Position="Bottom" ss:LineStyle="Double" ss:Weight="3" ss:Color="#64748B"/>
+        <Border ss:Position="Top" ss:LineStyle="Continuous" ss:Weight="2" ss:Color="#64748B"/>
+      </Borders>
+    </Style>
+  </Styles>
+
+  <!-- 工作表 1: 员工假勤汇总表 -->
+  <Worksheet ss:Name="员工假勤汇总表">
+    <Table ss:DefaultRowHeight="22">
+      <Column ss:Width="45"/>
+      <Column ss:Width="80"/>
+      <Column ss:Width="75"/>
+      <Column ss:Width="100"/>
+      <Column ss:Width="90"/>
+      <Column ss:Width="80"/>
+      <Column ss:Width="80"/>
+      <Column ss:Width="80"/>
+      <Column ss:Width="80"/>
+      <Column ss:Width="75"/>
+      <Column ss:Width="75"/>
+      <Column ss:Width="75"/>
+      <Column ss:Width="95"/>
+      <Column ss:Width="95"/>
+      <Column ss:Width="95"/>
+      <Column ss:Width="95"/>
+      <Column ss:Width="100"/>
+
+      <Row ss:Height="30">
+        <Cell ss:MergeAcross="16" ss:StyleID="TitleHeader">
+          <Data ss:Type="String">华星园社区 · 员工假勤汇总与额度对账表</Data>
+        </Cell>
+      </Row>
+      <Row ss:Height="20">
+        <Cell ss:MergeAcross="16" ss:StyleID="SubHeader">
+          <Data ss:Type="String">统计时间范围：${escapeXml(startDate)} 至 ${escapeXml(endDate)}   |   生成导出时间：${escapeXml(nowStr)}   |   全员共 ${employees ? employees.length : 0} 人</Data>
+        </Cell>
+      </Row>
+      <Row ss:Height="6"/>
+
+      <Row ss:Height="26">
+        <Cell ss:StyleID="ThStyle"><Data ss:Type="String">序号</Data></Cell>
+        <Cell ss:StyleID="ThStyle"><Data ss:Type="String">员工工号</Data></Cell>
+        <Cell ss:StyleID="ThStyle"><Data ss:Type="String">姓名</Data></Cell>
+        <Cell ss:StyleID="ThStyle"><Data ss:Type="String">联系电话</Data></Cell>
+        <Cell ss:StyleID="ThStyle"><Data ss:Type="String">期间请假(h)</Data></Cell>
+        <Cell ss:StyleID="ThStyle"><Data ss:Type="String">请假折算(天)</Data></Cell>
+        <Cell ss:StyleID="ThStyle"><Data ss:Type="String">年假扣减(h)</Data></Cell>
+        <Cell ss:StyleID="ThStyle"><Data ss:Type="String">病假扣减(h)</Data></Cell>
+        <Cell ss:StyleID="ThStyle"><Data ss:Type="String">调休休假(h)</Data></Cell>
+        <Cell ss:StyleID="ThStyle"><Data ss:Type="String">事假(h)</Data></Cell>
+        <Cell ss:StyleID="ThStyle"><Data ss:Type="String">期间加班(h)</Data></Cell>
+        <Cell ss:StyleID="ThStyle"><Data ss:Type="String">期间值班(h)</Data></Cell>
+        <Cell ss:StyleID="ThStyle"><Data ss:Type="String">期间加班赚取(h)</Data></Cell>
+        <Cell ss:StyleID="ThStyle"><Data ss:Type="String">调休池当前结余(h)</Data></Cell>
+        <Cell ss:StyleID="ThStyle"><Data ss:Type="String">年假当前剩余(h)</Data></Cell>
+        <Cell ss:StyleID="ThStyle"><Data ss:Type="String">病假当前剩余(h)</Data></Cell>
+        <Cell ss:StyleID="ThStyle"><Data ss:Type="String">期间考勤评定</Data></Cell>
+      </Row>`;
+
+      summaryRows.forEach(r => {
+        xml += `
+      <Row ss:Height="22">
+        <Cell ss:StyleID="TdCenter"><Data ss:Type="Number">${r.idx}</Data></Cell>
+        <Cell ss:StyleID="TdCenter"><Data ss:Type="String">${escapeXml(r.empNo)}</Data></Cell>
+        <Cell ss:StyleID="TdCenter"><Data ss:Type="String">${escapeXml(r.name)}</Data></Cell>
+        <Cell ss:StyleID="TdCenter"><Data ss:Type="String">${escapeXml(r.phone)}</Data></Cell>
+        <Cell ss:StyleID="TdNumber"><Data ss:Type="Number">${r.totalLeaveH}</Data></Cell>
+        <Cell ss:StyleID="TdNumber"><Data ss:Type="Number">${r.totalLeaveDays}</Data></Cell>
+        <Cell ss:StyleID="TdNumber"><Data ss:Type="Number">${r.aH}</Data></Cell>
+        <Cell ss:StyleID="TdNumber"><Data ss:Type="Number">${r.sH}</Data></Cell>
+        <Cell ss:StyleID="TdNumber"><Data ss:Type="Number">${r.cH}</Data></Cell>
+        <Cell ss:StyleID="TdNumber"><Data ss:Type="Number">${r.pH}</Data></Cell>
+        <Cell ss:StyleID="TdNumber"><Data ss:Type="Number">${r.otH}</Data></Cell>
+        <Cell ss:StyleID="TdNumber"><Data ss:Type="Number">${r.dtH}</Data></Cell>
+        <Cell ss:StyleID="TdNumber"><Data ss:Type="Number">${r.totalEarnedH}</Data></Cell>
+        <Cell ss:StyleID="TdNumber"><Data ss:Type="Number">${r.compRemain}</Data></Cell>
+        <Cell ss:StyleID="TdNumber"><Data ss:Type="Number">${r.annualRemain}</Data></Cell>
+        <Cell ss:StyleID="TdNumber"><Data ss:Type="Number">${r.sickRemain}</Data></Cell>
+        <Cell ss:StyleID="TdCenter"><Data ss:Type="String">${escapeXml(r.evalStatus)}</Data></Cell>
+      </Row>`;
+      });
+
+      xml += `
+      <Row ss:Height="24">
+        <Cell ss:StyleID="TotalRowStyle" ss:MergeAcross="3"><Data ss:Type="String">全员总合计 (TOTAL)</Data></Cell>
+        <Cell ss:StyleID="TotalNumStyle"><Data ss:Type="Number">${grandTotalLeaveH}</Data></Cell>
+        <Cell ss:StyleID="TotalNumStyle"><Data ss:Type="Number">${(grandTotalLeaveH / 8).toFixed(1)}</Data></Cell>
+        <Cell ss:StyleID="TotalNumStyle"><Data ss:Type="Number">${grandTotalAnnualH}</Data></Cell>
+        <Cell ss:StyleID="TotalNumStyle"><Data ss:Type="Number">${grandTotalSickH}</Data></Cell>
+        <Cell ss:StyleID="TotalNumStyle"><Data ss:Type="Number">${grandTotalCompH}</Data></Cell>
+        <Cell ss:StyleID="TotalNumStyle"><Data ss:Type="Number">${grandTotalPersonalH}</Data></Cell>
+        <Cell ss:StyleID="TotalNumStyle"><Data ss:Type="Number">${grandTotalOtH}</Data></Cell>
+        <Cell ss:StyleID="TotalNumStyle"><Data ss:Type="Number">${grandTotalDutyH}</Data></Cell>
+        <Cell ss:StyleID="TotalNumStyle"><Data ss:Type="Number">${grandTotalEarnedH}</Data></Cell>
+        <Cell ss:StyleID="TotalNumStyle"><Data ss:Type="Number">${grandTotalCompRemain}</Data></Cell>
+        <Cell ss:StyleID="TotalNumStyle"><Data ss:Type="Number">${grandTotalAnnualRemain}</Data></Cell>
+        <Cell ss:StyleID="TotalNumStyle"><Data ss:Type="Number">${grandTotalSickRemain}</Data></Cell>
+        <Cell ss:StyleID="TotalRowStyle"><Data ss:Type="String">--</Data></Cell>
+      </Row>
+    </Table>
+  </Worksheet>
+
+  <!-- 工作表 2: 逐日假勤明细流水表 -->
+  <Worksheet ss:Name="逐日假勤明细流水">
+    <Table ss:DefaultRowHeight="22">
+      <Column ss:Width="45"/>
+      <Column ss:Width="95"/>
+      <Column ss:Width="65"/>
+      <Column ss:Width="80"/>
+      <Column ss:Width="80"/>
+      <Column ss:Width="85"/>
+      <Column ss:Width="80"/>
+      <Column ss:Width="85"/>
+      <Column ss:Width="85"/>
+      <Column ss:Width="170"/>
+
+      <Row ss:Height="30">
+        <Cell ss:MergeAcross="9" ss:StyleID="TitleHeader">
+          <Data ss:Type="String">华星园社区 · 期间逐日假勤明细流水表</Data>
+        </Cell>
+      </Row>
+      <Row ss:Height="20">
+        <Cell ss:MergeAcross="9" ss:StyleID="SubHeader">
+          <Data ss:Type="String">明细流水范围：${escapeXml(startDate)} 至 ${escapeXml(endDate)}   |   共计流水明细：${detailRows.length} 条记录</Data>
+        </Cell>
+      </Row>
+      <Row ss:Height="6"/>
+
+      <Row ss:Height="26">
+        <Cell ss:StyleID="ThStyle"><Data ss:Type="String">序号</Data></Cell>
+        <Cell ss:StyleID="ThStyle"><Data ss:Type="String">考勤日期</Data></Cell>
+        <Cell ss:StyleID="ThStyle"><Data ss:Type="String">星期</Data></Cell>
+        <Cell ss:StyleID="ThStyle"><Data ss:Type="String">员工工号</Data></Cell>
+        <Cell ss:StyleID="ThStyle"><Data ss:Type="String">姓名</Data></Cell>
+        <Cell ss:StyleID="ThStyle"><Data ss:Type="String">假勤分类</Data></Cell>
+        <Cell ss:StyleID="ThStyle"><Data ss:Type="String">具体类型</Data></Cell>
+        <Cell ss:StyleID="ThStyle"><Data ss:Type="String">登记工时(h)</Data></Cell>
+        <Cell ss:StyleID="ThStyle"><Data ss:Type="String">折算天数</Data></Cell>
+        <Cell ss:StyleID="ThStyle"><Data ss:Type="String">扣减/计入规则说明</Data></Cell>
+      </Row>`;
+
+      if (detailRows.length === 0) {
+        xml += `
+      <Row ss:Height="26">
+        <Cell ss:MergeAcross="9" ss:StyleID="TdCenter"><Data ss:Type="String">（该统计时间范围内无请假或加班记录，全员正常全勤）</Data></Cell>
+      </Row>`;
+      } else {
+        detailRows.forEach((r, idx) => {
+          xml += `
+      <Row ss:Height="22">
+        <Cell ss:StyleID="TdCenter"><Data ss:Type="Number">${idx + 1}</Data></Cell>
+        <Cell ss:StyleID="TdCenter"><Data ss:Type="String">${escapeXml(r.date)}</Data></Cell>
+        <Cell ss:StyleID="TdCenter"><Data ss:Type="String">${escapeXml(r.week)}</Data></Cell>
+        <Cell ss:StyleID="TdCenter"><Data ss:Type="String">${escapeXml(r.empNo)}</Data></Cell>
+        <Cell ss:StyleID="TdCenter"><Data ss:Type="String">${escapeXml(r.name)}</Data></Cell>
+        <Cell ss:StyleID="TdCenter"><Data ss:Type="String">${escapeXml(r.category)}</Data></Cell>
+        <Cell ss:StyleID="TdCenter"><Data ss:Type="String">${escapeXml(r.type)}</Data></Cell>
+        <Cell ss:StyleID="TdNumber"><Data ss:Type="Number">${r.hours}</Data></Cell>
+        <Cell ss:StyleID="TdNumber"><Data ss:Type="Number">${r.days}</Data></Cell>
+        <Cell ss:StyleID="TdCenter"><Data ss:Type="String">${escapeXml(r.ruleDesc)}</Data></Cell>
+      </Row>`;
+        });
+      }
+
+      xml += `
+    </Table>
+  </Worksheet>
+</Workbook>`;
+
+      try {
+        const blob = new Blob([xml], { type: 'application/vnd.ms-excel;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const fileName = `华星园社区_考勤与假期统计对账表_${startDate}_至_${endDate}.xls`;
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = fileName;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+
+        closeExportModal();
+        showToast(`已成功导出: ${fileName}`);
+      } catch (err) {
+        console.error("导出 Excel 异常:", err);
+        showToast("导出失败，请检查浏览器下载权限");
+      }
+    }
+
+    // ================= 全局日期管理与联动引擎 =================
+    let calendarViewingYear = 2026;
+    let calendarViewingMonth = 11; // 1-12
+
+    function updateDateDisplay() {
+      const parts = currentDateStr.split('-');
+      const y = parseInt(parts[0], 10);
+      const m = parseInt(parts[1], 10);
+      const d = parseInt(parts[2], 10);
+      const dateObj = new Date(y, m - 1, d);
+
+      const displayEl = document.getElementById('cur-date-display');
+      if (displayEl) {
+        displayEl.innerText = `${y}年${String(m).padStart(2, '0')}月${String(d).padStart(2, '0')}日`;
+      }
+
+      const today = getTodayDateStr();
+
+      // 计算相对于真实今日的相差天数
+      const curMidnight = new Date(y, m - 1, d).setHours(0,0,0,0);
+      const now = new Date();
+      const todayMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate()).setHours(0,0,0,0);
+      const diffDays = Math.round((curMidnight - todayMidnight) / 86400000);
+
+      const weekDays = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
+      const weekStr = weekDays[dateObj.getDay()];
+
+      const badge = document.getElementById('today-badge');
+      if (badge) {
+        if (diffDays === 0) {
+          badge.innerText = "今天";
+          badge.className = "text-[10px] bg-gradient-to-r from-cyan-500/20 to-blue-500/20 border border-cyan-500/30 text-cyan-300 px-2 py-0.5 rounded-full font-semibold shadow-xs cursor-pointer";
+        } else if (diffDays === -1) {
+          badge.innerText = `昨天 (${weekStr})`;
+          badge.className = "text-[10px] bg-slate-800 border border-white/10 text-slate-300 px-2 py-0.5 rounded-full font-medium shadow-xs cursor-pointer";
+        } else if (diffDays === -2) {
+          badge.innerText = `前天 (${weekStr})`;
+          badge.className = "text-[10px] bg-slate-800 border border-white/10 text-slate-300 px-2 py-0.5 rounded-full font-medium shadow-xs cursor-pointer";
+        } else {
+          badge.innerText = weekStr;
+          badge.className = "text-[10px] bg-slate-800 border border-white/10 text-slate-300 px-2 py-0.5 rounded-full font-medium shadow-xs cursor-pointer";
+        }
+      }
+
+      // 当日之后的日期不可切换：后一天箭头灰度且不可点击
+      const btnNext = document.getElementById('btn-next-date');
+      if (btnNext) {
+        if (currentDateStr >= today) {
+          btnNext.disabled = true;
+          btnNext.className = "p-2 rounded-xl text-slate-600 opacity-30 cursor-not-allowed transition z-20 flex items-center justify-center pointer-events-none";
+          btnNext.title = "已是最新日期（未来日期不可切换）";
+        } else {
+          btnNext.disabled = false;
+          btnNext.className = "p-2 hover:bg-white/[0.08] rounded-xl text-slate-300 hover:text-white active:scale-90 transition z-20 flex items-center justify-center cursor-pointer";
+          btnNext.title = "后一天";
+        }
+      }
     }
 
     function switchDate(delta) {
-      showToast(delta > 0 ? "已切换至明天" : "已切换至昨天");
+      const today = getTodayDateStr();
+      if (delta > 0 && currentDateStr >= today) {
+        showToast("已是今日最新，不可切换到未来日期");
+        return;
+      }
+
+      const parts = currentDateStr.split('-');
+      const d = new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
+      d.setDate(d.getDate() + delta);
+      const ny = d.getFullYear();
+      const nm = String(d.getMonth() + 1).padStart(2, '0');
+      const nd = String(d.getDate()).padStart(2, '0');
+      let targetStr = `${ny}-${nm}-${nd}`;
+
+      if (targetStr > today) {
+        targetStr = today;
+      }
+      currentDateStr = targetStr;
+
+      updateDateDisplay();
+      renderDailyList();
+      renderSummary();
+      showToast(`已切换至 ${currentDateStr.split('-')[0]}年${currentDateStr.split('-')[1]}月${currentDateStr.split('-')[2]}日`);
+
+      if (API_BASE) {
+        syncDataFromCloud();
+      }
     }
 
+    // ================= 移动端专属高颜值日历抽屉核心逻辑 =================
+    function openCalendarModal() {
+      const parts = currentDateStr.split('-');
+      calendarViewingYear = parseInt(parts[0], 10);
+      calendarViewingMonth = parseInt(parts[1], 10);
+      renderCalendarQuickPills();
+      renderCalendarGrid();
+      const modal = document.getElementById('modal-calendar');
+      if (modal) modal.classList.remove('hidden');
+    }
+
+    function closeCalendarModal() {
+      const modal = document.getElementById('modal-calendar');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    function renderCalendarQuickPills() {
+      const container = document.getElementById('cal-quick-pills');
+      if (!container) return;
+      const today = getTodayDateStr();
+      const yesterday = getOffsetDateStr(-1);
+      const twoDaysAgo = getOffsetDateStr(-2);
+
+      const tParts = today.split('-');
+      const yParts = yesterday.split('-');
+      const dParts = twoDaysAgo.split('-');
+
+      const pills = [
+        { label: '今天', sub: `${tParts[1]}.${tParts[2]}`, val: today },
+        { label: '昨天', sub: `${yParts[1]}.${yParts[2]}`, val: yesterday },
+        { label: '前天', sub: `${dParts[1]}.${dParts[2]}`, val: twoDaysAgo }
+      ];
+
+      container.innerHTML = pills.map(p => {
+        const isCurrent = currentDateStr === p.val;
+        return `
+          <button onclick="pickCalendarDate('${p.val}')" class="flex-1 py-1.5 px-2 rounded-xl border text-center transition active:scale-95 ${
+            isCurrent
+              ? 'bg-cyan-500/20 border-cyan-400/40 text-cyan-300 font-bold shadow-[0_0_10px_rgba(6,182,212,0.2)]'
+              : 'bg-white/[0.04] border-white/[0.08] hover:bg-white/[0.08] text-slate-300'
+          }">
+            <span class="block text-xs font-semibold">${p.label}</span>
+            <span class="block text-[10px] text-slate-400 mt-0.5">${p.sub}</span>
+          </button>
+        `;
+      }).join('');
+    }
+
+    function changeCalendarMonth(delta) {
+      const today = getTodayDateStr();
+      const todayParts = today.split('-');
+      const ty = parseInt(todayParts[0], 10);
+      const tm = parseInt(todayParts[1], 10);
+
+      calendarViewingMonth += delta;
+      if (calendarViewingMonth > 12) {
+        calendarViewingYear++;
+        calendarViewingMonth = 1;
+      } else if (calendarViewingMonth < 1) {
+        calendarViewingYear--;
+        calendarViewingMonth = 12;
+      }
+
+      // 严禁切换到未来月份
+      if (calendarViewingYear > ty || (calendarViewingYear === ty && calendarViewingMonth > tm)) {
+        calendarViewingYear = ty;
+        calendarViewingMonth = tm;
+      }
+
+      renderCalendarGrid();
+    }
+
+    function jumpToCurrentMonth() {
+      const today = getTodayDateStr();
+      const parts = today.split('-');
+      calendarViewingYear = parseInt(parts[0], 10);
+      calendarViewingMonth = parseInt(parts[1], 10);
+      renderCalendarGrid();
+    }
+
+    function renderCalendarGrid() {
+      const grid = document.getElementById('cal-days-grid');
+      if (!grid) return;
+      grid.innerHTML = '';
+
+      const today = getTodayDateStr();
+      const todayParts = today.split('-');
+      const ty = parseInt(todayParts[0], 10);
+      const tm = parseInt(todayParts[1], 10);
+
+      // 标题与返回本月按钮
+      const titleEl = document.getElementById('cal-month-title');
+      if (titleEl) {
+        titleEl.innerText = `${calendarViewingYear}年 ${String(calendarViewingMonth).padStart(2, '0')}月`;
+      }
+
+      const backBtn = document.getElementById('cal-back-current-month-btn');
+      if (backBtn) {
+        if (calendarViewingYear === ty && calendarViewingMonth === tm) {
+          backBtn.classList.add('hidden');
+        } else {
+          backBtn.classList.remove('hidden');
+        }
+      }
+
+      // 下个月按钮控制：若已是当前月，置灰禁用
+      const nextMonthBtn = document.getElementById('cal-next-month-btn');
+      if (nextMonthBtn) {
+        if (calendarViewingYear > ty || (calendarViewingYear === ty && calendarViewingMonth >= tm)) {
+          nextMonthBtn.disabled = true;
+          nextMonthBtn.className = "p-1.5 rounded-xl text-slate-600 opacity-25 cursor-not-allowed pointer-events-none transition flex items-center justify-center";
+        } else {
+          nextMonthBtn.disabled = false;
+          nextMonthBtn.className = "p-1.5 hover:bg-white/[0.08] active:scale-90 rounded-xl text-slate-300 hover:text-white transition flex items-center justify-center cursor-pointer";
+        }
+      }
+
+      // 计算本月第一天是星期几 (周一为 0, 周日为 6)
+      const firstDate = new Date(calendarViewingYear, calendarViewingMonth - 1, 1);
+      let startDayOfWeek = firstDate.getDay();
+      startDayOfWeek = startDayOfWeek === 0 ? 6 : startDayOfWeek - 1;
+
+      // 本月总天数与上月总天数
+      const daysInMonth = new Date(calendarViewingYear, calendarViewingMonth, 0).getDate();
+      const daysInPrevMonth = new Date(calendarViewingYear, calendarViewingMonth - 1, 0).getDate();
+
+      // 1. 渲染上月末尾的日期格子
+      for (let i = startDayOfWeek - 1; i >= 0; i--) {
+        const d = daysInPrevMonth - i;
+        const cell = document.createElement('div');
+        cell.className = "h-10 rounded-xl flex flex-col items-center justify-center text-slate-600 opacity-25 pointer-events-none select-none text-[11px]";
+        cell.innerHTML = `<span>${d}</span>`;
+        grid.appendChild(cell);
+      }
+
+      // 2. 渲染本月所有天数
+      for (let d = 1; d <= daysInMonth; d++) {
+        const dayStr = `${calendarViewingYear}-${String(calendarViewingMonth).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+        const isFuture = dayStr > today;
+        const isSelected = dayStr === currentDateStr;
+        const isToday = dayStr === today;
+
+        // 检查该日期是否有假勤记录
+        let hasLeave = false;
+        let hasOt = false;
+        (employees || []).forEach(emp => {
+          (emp.records || []).forEach(r => {
+            if (r.date === dayStr) {
+              if (r.category === 'leave') hasLeave = true;
+              if (r.category === 'ot') hasOt = true;
+            }
+          });
+        });
+
+        const cell = document.createElement('div');
+        cell.className = "h-10 rounded-xl flex flex-col items-center justify-center relative transition select-none text-xs";
+
+        let indicatorDot = '';
+        if (hasLeave && hasOt) {
+          indicatorDot = '<div class="flex items-center gap-0.5 mt-0.5"><span class="w-1 h-1 rounded-full bg-amber-400"></span><span class="w-1 h-1 rounded-full bg-purple-400"></span></div>';
+        } else if (hasLeave) {
+          indicatorDot = '<div class="mt-0.5"><span class="w-1.5 h-1.5 rounded-full bg-amber-400 shadow-[0_0_6px_rgba(251,191,36,0.8)] inline-block"></span></div>';
+        } else if (hasOt) {
+          indicatorDot = '<div class="mt-0.5"><span class="w-1.5 h-1.5 rounded-full bg-purple-400 shadow-[0_0_6px_rgba(168,85,247,0.8)] inline-block"></span></div>';
+        } else {
+          indicatorDot = '<div class="h-1.5 mt-0.5"></div>';
+        }
+
+        if (isFuture) {
+          // 未来日期禁用
+          cell.className += " text-slate-600 opacity-20 cursor-not-allowed pointer-events-none";
+          cell.innerHTML = `<span class="text-[11px]">${d}</span>${indicatorDot}`;
+        } else if (isSelected) {
+          // 当前选中的日期：高亮青色/靛蓝渐变
+          cell.className += " bg-gradient-to-br from-cyan-500 to-indigo-600 text-white font-black shadow-lg shadow-cyan-500/35 border border-cyan-300/40 cursor-pointer scale-102";
+          cell.onclick = () => pickCalendarDate(dayStr);
+          cell.innerHTML = `<span class="font-bold">${d}</span>${indicatorDot}`;
+        } else if (isToday) {
+          // 今日但未选中：带青色外环与微光背景
+          cell.className += " border border-cyan-400/60 bg-cyan-500/10 text-cyan-300 font-bold hover:bg-cyan-500/20 active:scale-95 cursor-pointer";
+          cell.onclick = () => pickCalendarDate(dayStr);
+          cell.innerHTML = `<span>${d}</span>${indicatorDot}`;
+        } else {
+          // 正常的过去可选日期
+          cell.className += " text-slate-200 hover:bg-white/[0.08] active:scale-95 cursor-pointer";
+          cell.onclick = () => pickCalendarDate(dayStr);
+          cell.innerHTML = `<span>${d}</span>${indicatorDot}`;
+        }
+
+        grid.appendChild(cell);
+      }
+
+      // 3. 补齐末尾单元格
+      const totalRendered = startDayOfWeek + daysInMonth;
+      const remaining = (7 - (totalRendered % 7)) % 7;
+      for (let nextD = 1; nextD <= remaining; nextD++) {
+        const cell = document.createElement('div');
+        cell.className = "h-10 rounded-xl flex flex-col items-center justify-center text-slate-600 opacity-25 pointer-events-none select-none text-[11px]";
+        cell.innerHTML = `<span>${nextD}</span>`;
+        grid.appendChild(cell);
+      }
+    }
+
+    function pickCalendarDate(dateStr) {
+      const today = getTodayDateStr();
+      if (dateStr > today) {
+        showToast("不可选择未来日期");
+        return;
+      }
+      currentDateStr = dateStr;
+      updateDateDisplay();
+      renderDailyList();
+      renderSummary();
+      closeCalendarModal();
+      const parts = dateStr.split('-');
+      showToast(`已切换至 ${parts[0]}年${parts[1]}月${parts[2]}日`);
+      if (API_BASE) syncDataFromCloud();
+    }
+
+    updateDateDisplay();
     renderDailyList();
+    applyTheme(currentTheme);
     if (API_BASE) {
       syncDataFromCloud();
     } else {

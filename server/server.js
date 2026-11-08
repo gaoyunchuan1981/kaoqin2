@@ -68,21 +68,8 @@ db.serialize(() => {
     )
   `);
 
-  // 初始化默认员工数据（仅首次建表时填充）
-  db.get("SELECT COUNT(*) as count FROM employees", (err, row) => {
-    if (row && row.count === 0) {
-      const stmt = db.prepare(`
-        INSERT INTO employees (emp_no, name, phone, avatar, annual_quota, sick_quota)
-        VALUES (?, ?, ?, ?, ?, ?)
-      `);
-      stmt.run("EMP-001", "陈晓", "13800138001", "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150", 40, 80);
-      stmt.run("EMP-002", "张健", "13912345678", "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150", 80, 80);
-      stmt.run("EMP-003", "李慧敏", "13766668888", "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=150", 40, 80);
-      stmt.run("EMP-004", "王强", "15988889999", "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150", 64, 80);
-      stmt.finalize();
-      console.log('✅ 初始化社区员工数据成功！');
-    }
-  });
+  // 生产环境：保持数据库纯净，由管理员录入或云端同步真实员工数据
+  console.log('✅ SQLite 数据库与数据表已准备就绪 (生产模式)');
 });
 
 // ======================= API 路由接口 =======================
